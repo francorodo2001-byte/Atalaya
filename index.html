@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MKT · Panel de Agencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0d0c; --bg-2: #131513; --line: #2a2d2a;
+    --ink: #ecebe6; --ink-2: #b8b6ab; --ink-3: #6e6e64;
+    --accent: #d6ff3d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: 'Inter Tight', sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; }
+
+  .shell { display: flex; flex-direction: column; height: 100vh; }
+
+  .topnav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; height: 54px;
+    background: var(--bg-2); border-bottom: 1px solid var(--line);
+    flex-shrink: 0; gap: 16px;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; }
+  .nav-mark { width: 18px; height: 18px; background: var(--accent); transform: rotate(45deg); position: relative; flex-shrink: 0; }
+  .nav-mark::after { content: ''; position: absolute; inset: 4px; background: var(--bg-2); }
+  .nav-brand-text { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap; }
+  .nav-brand-text em { font-style: italic; color: var(--ink-2); font-weight: 400; }
+
+  .nav-tabs { display: flex; gap: 4px; }
+  .tab-btn {
+    padding: 8px 20px;
+    background: transparent; border: 1px solid transparent;
+    color: var(--ink-3); font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em;
+    cursor: pointer; border-radius: 3px; transition: all 0.15s; white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--ink); border-color: var(--line); }
+  .tab-btn.active { color: #0a0a0a; background: var(--ink); border-color: var(--ink); font-weight: 600; }
+
+  .frame-area { flex: 1; overflow: hidden; }
+  .frame-area iframe { width: 100%; height: 100%; border: none; display: block; }
+
+  @media (max-width: 480px) {
+    .topnav { padding: 0 14px; }
+    .tab-btn { padding: 7px 12px; font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="topnav">
+    <div class="nav-brand">
+      <div class="nav-mark"></div>
+      <span class="nav-brand-text">MKT<em> · agencia</em></span>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="tabAds">▸ Ads Dashboard</button>
+      <button class="tab-btn" id="tabCrm">▸ CRM</button>
+    </div>
+  </nav>
+  <div class="frame-area">
+    <iframe id="mainFrame" src="/ads" title="Panel MKT"></iframe>
+  </div>
+</div>
+
+<script>
+  let current = 'ads';
+
+  function switchTab(tab) {
+    if (tab === current) return;
+    current = tab;
+    document.getElementById('tabAds').classList.toggle('active', tab === 'ads');
+    document.getElementById('tabCrm').classList.toggle('active', tab === 'crm');
+    document.getElementById('mainFrame').src = tab === 'ads' ? '/ads' : '/crm';
+  }
+
+  document.getElementById('tabAds').addEventListener('click', () => switchTab('ads'));
+  document.getElementById('tabCrm').addEventListener('click', () => switchTab('crm'));
+</script>
+</body>
+</html>

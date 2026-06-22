@@ -1,0 +1,9 @@
+{
+  "name": "atalaya-meta-ads",
+  "version": "1.0.0",
+  "description": "Dashboard de Meta Ads para gestionar cuentas de clientes",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}
