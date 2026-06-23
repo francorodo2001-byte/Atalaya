@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* ── DESIGN SYSTEM ──────────────────────────────────────── */
   :root {
     --bg:          #0c0b1a;
     --surface:     #141330;
@@ -21,17 +20,15 @@
     --text-3:      #504e70;
     --accent:      #f5b731;
     --accent-dim:  rgba(245,183,49,0.12);
+    --accent-glow: rgba(245,183,49,0.25);
     --good:        #52e8b0;
     --good-dim:    rgba(82,232,176,0.12);
     --warn:        #f5b731;
-    --warn-dim:    rgba(245,183,49,0.12);
     --bad:         #ff4d6d;
     --bad-dim:     rgba(255,77,109,0.12);
     --info:        #60a5fa;
-    --info-dim:    rgba(96,165,250,0.12);
     --shadow:      0 8px 40px rgba(0,0,0,0.55);
     --shadow-sm:   0 2px 14px rgba(0,0,0,0.4);
-    --shadow-xs:   0 1px 4px rgba(0,0,0,0.3);
     --r:    16px;
     --r-sm: 10px;
     --r-xs: 6px;
@@ -48,615 +45,792 @@
     --text-3:      #9a97b8;
     --accent:      #c48f0c;
     --accent-dim:  rgba(196,143,12,0.10);
+    --accent-glow: rgba(196,143,12,0.20);
     --good:        #0ea470;
     --good-dim:    rgba(14,164,112,0.10);
     --warn:        #c48f0c;
-    --warn-dim:    rgba(196,143,12,0.10);
     --bad:         #e02448;
     --bad-dim:     rgba(224,36,72,0.10);
     --info:        #2563eb;
-    --info-dim:    rgba(37,99,235,0.10);
     --shadow:      0 8px 40px rgba(26,24,40,0.10);
     --shadow-sm:   0 2px 14px rgba(26,24,40,0.07);
-    --shadow-xs:   0 1px 4px rgba(26,24,40,0.06);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg); color: var(--text);
+  html, body {
+    height: 100%; background: var(--bg); color: var(--text);
     font-family: 'Inter', -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased; font-size: 14px;
-    min-height: 100vh;
-    transition: background 0.25s, color 0.25s;
+    overflow: hidden;
   }
 
-  /* ── PAGE SHELL ─────────────────────────────────────────── */
-  .page { max-width: 1440px; margin: 0 auto; padding: 28px 28px 64px; }
+  .app { display: flex; flex-direction: column; height: 100vh; }
 
-  /* ── TOP BAR ────────────────────────────────────────────── */
+  /* ── TOPBAR ─────────────────────────────────────────────── */
   .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 32px; gap: 16px; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0; flex-wrap: wrap;
   }
-  .topbar-left { display: flex; align-items: center; gap: 14px; }
-  .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; color: var(--text); }
+  .topbar-title { font-size: 15px; font-weight: 700; letter-spacing: -0.03em; }
   .live-pill {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 10px; border-radius: 99px;
+    padding: 3px 9px; border-radius: 20px;
     background: var(--good-dim); color: var(--good);
-    font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+    font-size: 11px; font-weight: 600;
   }
   .live-dot {
     width: 6px; height: 6px; border-radius: 50%;
-    background: var(--good);
-    animation: pulse 2s ease-in-out infinite;
+    background: var(--good); animation: pulse 2s infinite;
   }
-  .live-dot.loading { background: var(--warn); animation: none; opacity: 0.6; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+  .topbar-spacer { flex: 1; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
 
-  .topbar-right { display: flex; align-items: center; gap: 10px; }
-  .last-upd { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+  .sel {
+    appearance: none; padding: 6px 28px 6px 11px;
+    background: var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a87b0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") no-repeat right 9px center;
+    border: 1px solid var(--border-2); border-radius: var(--r-xs);
+    color: var(--text); font-size: 13px; font-family: 'Inter',sans-serif;
+    cursor: pointer; transition: border-color .15s; min-width: 130px;
+  }
+  .sel:focus { outline: none; border-color: var(--accent); }
 
-  .btn { display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500; transition: all 0.15s; }
-  .btn-primary {
-    background: var(--accent); color: #0c0b1a;
-    padding: 9px 18px; border-radius: var(--r-sm); font-size: 13px; font-weight: 600;
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 13px; border-radius: var(--r-xs);
+    font-family: 'Inter',sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all .15s; border: none;
   }
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,183,49,0.35); }
-  [data-theme="light"] .btn-primary:hover { box-shadow: 0 4px 12px rgba(196,143,12,0.35); }
-  .btn-ghost {
-    background: var(--surface); color: var(--text-2);
-    padding: 9px 16px; border-radius: var(--r-sm); font-size: 13px;
-    border: 1px solid var(--border-2);
-  }
-  .btn-ghost:hover { color: var(--text); border-color: var(--text-3); }
+  .btn-ghost { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border-2); }
+  .btn-ghost:hover { color: var(--text); }
+  .btn-ghost:disabled { opacity: .5; cursor: default; }
+  .btn-accent { background: var(--accent); color: #0c0b1a; font-weight: 700; }
+  .btn-accent:hover { filter: brightness(1.08); }
 
-  /* ── METRICS ────────────────────────────────────────────── */
-  .metrics {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px; margin-bottom: 28px;
+  /* ── SUBNAV ─────────────────────────────────────────────── */
+  .subnav {
+    display: flex; align-items: center; gap: 2px;
+    padding: 0 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
+  .subnav-tab {
+    display: flex; align-items: center; gap: 7px;
+    padding: 11px 14px; font-size: 13px; font-weight: 500;
+    color: var(--text-2); cursor: pointer; border: none;
+    background: transparent; font-family: 'Inter',sans-serif;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all .15s;
+  }
+  .subnav-tab:hover { color: var(--text); }
+  .subnav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .snav-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 7px;
+    border-radius: 20px; background: var(--surface-2); color: var(--text-3);
+    transition: all .15s;
+  }
+  .subnav-tab.active .snav-badge { background: var(--accent-dim); color: var(--accent); }
+
+  /* ── CONTENT ─────────────────────────────────────────────── */
+  .content { flex: 1; overflow-y: auto; padding: 20px; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── METRIC CARDS ─────────────────────────────────────────── */
+  .metrics-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin-bottom: 20px;
+  }
+  @media(max-width:860px){ .metrics-row{ grid-template-columns: repeat(2,1fr); } }
+
   .metric-card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 22px 24px;
-    box-shadow: var(--shadow-sm);
-    transition: background 0.25s, border-color 0.25s, transform 0.15s, box-shadow 0.15s;
+    border-radius: var(--r); padding: 18px 20px;
+    transition: border-color .2s, box-shadow .2s;
     position: relative; overflow: hidden;
   }
-  .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-  .metric-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: var(--border-2); border-radius: var(--r) var(--r) 0 0;
-    transition: background 0.25s;
-  }
-  .metric-card.good::before { background: var(--good); }
-  .metric-card.warn::before { background: var(--warn); }
-  .metric-card.bad::before  { background: var(--bad); }
-  .metric-card.info::before { background: var(--info); }
-
-  .metric-icon { font-size: 18px; margin-bottom: 14px; }
-  .metric-value {
-    font-size: 48px; font-weight: 800; line-height: 1;
-    letter-spacing: -0.04em; color: var(--text);
-    margin-bottom: 6px; font-variant-numeric: tabular-nums;
-    transition: color 0.25s;
-  }
-  .metric-card.good .metric-value { color: var(--good); }
-  .metric-card.warn .metric-value { color: var(--warn); }
-  .metric-card.bad .metric-value  { color: var(--bad); }
+  .metric-card:hover { border-color: var(--border-2); box-shadow: var(--shadow-sm); }
+  .metric-card-accent { border-left: 3px solid var(--accent); }
   .metric-label {
-    font-size: 12px; font-weight: 500; color: var(--text-3);
-    text-transform: uppercase; letter-spacing: 0.08em;
+    font-size: 11px; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text-3); margin-bottom: 10px;
+  }
+  .metric-value {
+    font-size: 30px; font-weight: 800; letter-spacing: -.04em;
+    line-height: 1; margin-bottom: 8px;
+  }
+  .metric-value.good { color: var(--good); }
+  .metric-value.warn { color: var(--warn); }
+  .metric-value.bad  { color: var(--bad);  }
+  .metric-sub { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 5px; }
+  .metric-tag {
+    font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
+    background: var(--surface-2);
   }
 
-  /* ── FILTER BAR ─────────────────────────────────────────── */
-  .filterbar {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+  /* ── TOOLBAR ─────────────────────────────────────────────── */
+  .toolbar {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px; flex-wrap: wrap;
   }
-  .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-  .filter-pill {
-    padding: 8px 16px; border-radius: 99px; cursor: pointer;
-    border: 1px solid var(--border-2); background: transparent;
-    color: var(--text-2); font-family: 'Inter', sans-serif;
-    font-size: 13px; font-weight: 500; transition: all 0.15s;
-  }
-  .filter-pill:hover { border-color: var(--text-3); color: var(--text); }
-  .filter-pill.active {
-    background: var(--accent); color: #0c0b1a;
-    border-color: var(--accent); font-weight: 600;
-  }
+  .toolbar-title { font-size: 14px; font-weight: 600; }
+  .toolbar-spacer { flex: 1; }
 
-  .filter-actions { display: flex; align-items: center; gap: 10px; }
-  .search-input {
-    background: var(--surface); border: 1px solid var(--border-2);
-    color: var(--text); padding: 9px 14px; border-radius: var(--r-sm);
-    font-family: 'Inter', sans-serif; font-size: 13px;
-    outline: none; transition: border-color 0.15s; min-width: 200px;
+  .pills { display: flex; gap: 5px; flex-wrap: wrap; }
+  .pill {
+    padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: all .15s; border: 1px solid var(--border-2);
+    background: transparent; color: var(--text-2); font-family: 'Inter',sans-serif;
   }
-  .search-input:focus { border-color: var(--accent); }
-  .search-input::placeholder { color: var(--text-3); }
+  .pill:hover { color: var(--text); }
+  .pill.active { background: var(--accent-dim); color: var(--accent); border-color: transparent; }
 
-  .btn-text-sm {
-    background: none; border: none; cursor: pointer;
-    color: var(--text-3); font-family: 'Inter', sans-serif;
-    font-size: 12px; font-weight: 500; transition: color 0.15s; padding: 4px;
+  /* ── TABLE ─────────────────────────────────────────────── */
+  .table-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); overflow: auto;
   }
-  .btn-text-sm:hover { color: var(--text-2); }
-
-  /* ── CLIENT LIST ────────────────────────────────────────── */
-  .clients { display: flex; flex-direction: column; gap: 12px; }
-
-  .empty-state {
-    padding: 64px 20px; text-align: center; color: var(--text-3);
-    font-size: 13px; background: var(--surface); border-radius: var(--r);
-    border: 1px solid var(--border);
+  table { width: 100%; border-collapse: collapse; min-width: 700px; }
+  thead th {
+    padding: 10px 14px; text-align: left;
+    font-size: 11px; font-weight: 600; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--text-3);
+    background: var(--surface-2); border-bottom: 1px solid var(--border);
+    white-space: nowrap; cursor: pointer; user-select: none;
+    transition: color .15s;
   }
-  .empty-state strong { display: block; font-size: 15px; color: var(--text-2); margin-bottom: 6px; }
+  thead th:hover { color: var(--text-2); }
+  thead th.sorted { color: var(--accent); }
+  .sort-icon { margin-left: 4px; font-size: 10px; opacity: .6; }
+  thead th.sorted .sort-icon { opacity: 1; }
 
-  /* ── CLIENT CARD ────────────────────────────────────────── */
-  .client-card {
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.025); }
+  [data-theme="light"] tbody tr:hover { background: rgba(0,0,0,0.02); }
+  tbody td { padding: 11px 14px; font-size: 13px; color: var(--text-2); vertical-align: middle; }
+
+  .c-name { display: flex; align-items: center; gap: 10px; }
+  .c-icon {
+    width: 34px; height: 34px; border-radius: var(--r-xs);
+    background: var(--surface-3); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+  }
+  .c-name-text { font-weight: 500; color: var(--text); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .c-name-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .c-account { font-size: 12px; color: var(--text-3); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .bdot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .badge.active   { background: var(--good-dim); color: var(--good); }
+  .badge.active .bdot { background: var(--good); }
+  .badge.paused   { background: var(--accent-dim); color: var(--warn); }
+  .badge.paused .bdot { background: var(--warn); }
+  .badge.disabled { background: var(--bad-dim);  color: var(--bad); }
+  .badge.disabled .bdot { background: var(--bad); }
+
+  .val  { font-variant-numeric: tabular-nums; font-weight: 500; color: var(--text); }
+  .vgood { color: var(--good); font-weight: 700; }
+  .vwarn { color: var(--warn); font-weight: 700; }
+  .vbad  { color: var(--bad);  font-weight: 700; }
+
+  .roas-wrap { display: flex; align-items: center; gap: 8px; }
+  .roas-bar-bg { flex: 1; height: 4px; background: var(--surface-3); border-radius: 2px; min-width: 36px; }
+  .roas-bar-fill { height: 4px; border-radius: 2px; transition: width .4s; }
+
+  .row-actions { display: flex; gap: 4px; opacity: 0; transition: opacity .15s; }
+  tbody tr:hover .row-actions { opacity: 1; }
+  .ract {
+    width: 27px; height: 27px; border-radius: var(--r-xs);
+    background: transparent; border: 1px solid var(--border-2);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; transition: all .15s; color: var(--text-2);
+  }
+  .ract:hover { background: var(--surface-2); color: var(--text); }
+
+  /* ── STATE BOX ─────────────────────────────────────────────── */
+  .state { text-align: center; padding: 56px 20px; }
+  .state-ico { font-size: 40px; margin-bottom: 12px; }
+  .state-ttl { font-size: 15px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+  .state-sub { font-size: 13px; color: var(--text-3); }
+
+  /* ── LIBRARY ─────────────────────────────────────────────── */
+  .lib-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
+  }
+  .creative-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--r); overflow: hidden;
-    box-shadow: var(--shadow-xs);
-    transition: border-color 0.15s, box-shadow 0.15s, background 0.25s;
+    cursor: pointer; transition: border-color .2s, transform .15s;
   }
-  .client-card:hover { border-color: var(--border-2); box-shadow: var(--shadow-sm); }
-  .client-card.has-alert  { border-left: 3px solid var(--warn); }
-  .client-card.has-critical { border-left: 3px solid var(--bad); }
-  .client-card.collapsed .card-body { display: none; }
-
-  /* Card header */
-  .card-header {
-    display: grid;
-    grid-template-columns: 1fr repeat(4,auto) 36px;
-    gap: 20px; padding: 18px 20px;
-    align-items: center; cursor: pointer;
-    transition: background 0.12s;
-    border-bottom: 1px solid transparent;
-  }
-  .client-card:not(.collapsed) .card-header { border-bottom-color: var(--border); }
-  .card-header:hover { background: var(--surface-2); }
-
-  .client-identity { display: flex; align-items: center; gap: 14px; min-width: 0; }
-  .avatar {
-    width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  .creative-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+  .creative-thumb {
+    height: 130px; background: var(--surface-2);
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 700; color: #0c0b1a;
+    font-size: 38px; position: relative;
   }
-  .client-name {
-    font-size: 15px; font-weight: 600; color: var(--text);
-    letter-spacing: -0.02em; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis;
-    margin-bottom: 5px;
+  .creative-badge-overlay { position: absolute; top: 8px; right: 8px; }
+  .creative-body { padding: 12px 13px; }
+  .creative-name {
+    font-size: 12px; font-weight: 600; color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    margin-bottom: 2px;
   }
-  .client-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .status-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600;
+  .creative-acct { font-size: 11px; color: var(--text-3); margin-bottom: 10px; }
+  .creative-stats { display: flex; justify-content: space-between; }
+  .cstat-val { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1; }
+  .cstat-lbl { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+  .verdict {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 4px; margin-top: 8px;
+    letter-spacing: .04em; text-transform: uppercase;
   }
-  .status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-  .status-badge.active  { background: var(--good-dim); color: var(--good); }
-  .status-badge.active::before  { background: var(--good); }
-  .status-badge.paused  { background: var(--warn-dim); color: var(--warn); }
-  .status-badge.paused::before  { background: var(--warn); }
-  .status-badge.disabled{ background: var(--bad-dim);  color: var(--bad); }
-  .status-badge.disabled::before{ background: var(--bad); }
-  .client-tag {
-    font-size: 11px; color: var(--text-3); font-weight: 400;
-  }
+  .verdict.scale   { background: var(--good-dim);   color: var(--good); }
+  .verdict.iterate { background: var(--accent-dim);  color: var(--warn); }
+  .verdict.cut     { background: var(--bad-dim);     color: var(--bad);  }
 
-  .kpi { text-align: right; min-width: 80px; }
-  .kpi-label { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-  .kpi-value { font-size: 15px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-  .kpi-value.pos  { color: var(--good); }
-  .kpi-value.neg  { color: var(--bad); }
-  .kpi-value.good { color: var(--good); }
-  .kpi-value.mid  { color: var(--warn); }
-  .kpi-value.bad  { color: var(--bad); }
-
-  .chevron {
-    width: 36px; height: 36px; border-radius: var(--r-xs);
-    background: var(--surface-2); display: flex; align-items: center; justify-content: center;
-    color: var(--text-3); font-size: 11px;
-    transition: transform 0.2s ease, background 0.15s;
+  /* ── AUTOMATIONS ─────────────────────────────────────────── */
+  .auto-list { display: flex; flex-direction: column; gap: 10px; }
+  .auto-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 16px 18px;
+    display: flex; align-items: center; gap: 14px;
+    transition: border-color .2s;
   }
-  .client-card.collapsed .chevron { transform: rotate(-90deg); }
-  .card-header:hover .chevron { background: var(--surface-3); }
-
-  /* Card body */
-  .card-body { padding: 20px; }
-
-  .alerts-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-  .alert-row {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 12px 16px; border-radius: var(--r-sm);
-    font-size: 13px;
+  .auto-card:hover { border-color: var(--border-2); }
+  .auto-ico {
+    width: 40px; height: 40px; border-radius: var(--r-sm);
+    background: var(--surface-2); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
   }
-  .alert-row.bad  { background: var(--bad-dim); }
-  .alert-row.warn { background: var(--warn-dim); }
-  .alert-row.info { background: var(--info-dim); }
-  .alert-tag {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.1em; padding: 2px 7px; border-radius: 4px;
-    flex-shrink: 0; margin-top: 1px;
+  .auto-body { flex: 1; min-width: 0; }
+  .auto-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .auto-desc { font-size: 12px; color: var(--text-3); line-height: 1.5; }
+  .auto-status {
+    font-size: 11px; font-weight: 700; padding: 3px 9px;
+    border-radius: 20px; flex-shrink: 0;
   }
-  .alert-row.bad  .alert-tag { background: var(--bad); color: #fff; }
-  .alert-row.warn .alert-tag { background: var(--warn); color: #0c0b1a; }
-  .alert-row.info .alert-tag { background: var(--info); color: #fff; }
-  .alert-msg { color: var(--text); line-height: 1.5; }
-  .alert-msg strong { font-weight: 600; }
-
-  /* Campaign table */
-  .camps-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
+  .auto-status.on  { background: var(--good-dim); color: var(--good); }
+  .auto-status.off { background: var(--surface-2); color: var(--text-3); }
+  .toggle {
+    width: 38px; height: 21px; background: var(--surface-3);
+    border-radius: 11px; position: relative; cursor: pointer;
+    transition: background .2s; border: none; flex-shrink: 0;
   }
-  .camps-title { font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.1em; }
-  .camps-count { font-size: 12px; color: var(--text-3); }
-
-  .camp-table { width: 100%; border-collapse: collapse; }
-  .camp-table thead tr {
-    border-bottom: 1px solid var(--border);
+  .toggle.on { background: var(--good); }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 15px; height: 15px; border-radius: 50%; background: #fff;
+    transition: transform .2s;
   }
-  .camp-table th {
-    text-align: left; padding: 8px 12px; font-size: 10px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3);
+  .toggle.on::after { transform: translateX(17px); }
+  .auto-add-btn {
+    border: 2px dashed var(--border-2); border-radius: var(--r);
+    padding: 22px; text-align: center; cursor: pointer;
+    transition: border-color .15s, background .15s;
+    background: transparent; color: var(--text-3);
+    font-family: 'Inter',sans-serif; font-size: 13px; font-weight: 500;
+    width: 100%;
   }
-  .camp-table th.r { text-align: right; }
-  .camp-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-  .camp-table tbody tr:last-child { border-bottom: none; }
-  .camp-table tbody tr:hover { background: var(--surface-2); }
-  .camp-table td { padding: 12px; font-size: 13px; vertical-align: middle; }
-  .camp-table td.r { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+  .auto-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
-  .camp-name { font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-  .camp-obj  { font-size: 11px; color: var(--text-3); margin-top: 3px; }
-
-  .roas-val { font-weight: 700; }
-  .roas-val.good { color: var(--good); }
-  .roas-val.mid  { color: var(--warn); }
-  .roas-val.bad  { color: var(--bad); }
-
-  /* ── TOAST ──────────────────────────────────────────────── */
-  .toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  /* ── MODAL ─────────────────────────────────────────────── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
+    z-index: 100; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
     background: var(--surface); border: 1px solid var(--border-2);
-    padding: 12px 20px; border-radius: var(--r-sm);
-    font-size: 13px; font-weight: 500; z-index: 999;
-    opacity: 0; transition: opacity 0.2s; color: var(--text);
-    box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px;
-    pointer-events: none;
+    border-radius: var(--r); padding: 28px; width: 100%; max-width: 480px;
+    box-shadow: var(--shadow);
   }
-  .toast.show { opacity: 1; }
-  .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); flex-shrink: 0; }
-  .toast.bad .toast-dot { background: var(--bad); }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--text-3); margin-bottom: 22px; }
+  .form-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); margin-bottom: 6px; display: block; }
+  .form-row { margin-bottom: 16px; }
+  .form-input {
+    width: 100%; padding: 9px 12px;
+    background: var(--surface-2); border: 1px solid var(--border-2);
+    border-radius: var(--r-xs); color: var(--text);
+    font-family: 'Inter',sans-serif; font-size: 13px; transition: border-color .15s;
+  }
+  .form-input:focus { outline: none; border-color: var(--accent); }
+  .form-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
 
-  /* ── LOADING ────────────────────────────────────────────── */
-  .loading-overlay {
-    position: fixed; inset: 0;
-    background: rgba(12,11,26,0.7); backdrop-filter: blur(6px);
-    z-index: 50; display: none; align-items: center; justify-content: center;
-  }
-  [data-theme="light"] .loading-overlay { background: rgba(240,239,250,0.7); }
-  .loading-overlay.show { display: flex; }
-  .spinner {
-    width: 44px; height: 44px; border-radius: 50%;
-    border: 3px solid var(--border-2);
-    border-top-color: var(--accent);
-    animation: spin 0.75s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── RESPONSIVE ─────────────────────────────────────────── */
-  @media (max-width: 1000px) {
-    .metrics { grid-template-columns: repeat(2,1fr); }
-    .card-header { grid-template-columns: 1fr auto 36px; }
-    .kpi:not(.kpi-balance) { display: none; }
-  }
-  @media (max-width: 600px) {
-    .page { padding: 16px 16px 48px; }
-    .metrics { grid-template-columns: repeat(2,1fr); gap: 10px; }
-    .metric-value { font-size: 36px; }
-    .filter-pill { font-size: 12px; padding: 7px 12px; }
-    .search-input { min-width: 140px; }
-    .camp-table thead { display: none; }
-    .camp-table tbody tr { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 10px 12px; }
-    .camp-table td { padding: 2px 0; border: none !important; }
-    .camp-table td.r { text-align: left; }
-    .camp-table td:first-child { grid-column: 1 / -1; border-bottom: 1px solid var(--border) !important; padding-bottom: 8px !important; margin-bottom: 4px; }
-  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 </style>
 </head>
 <body>
+<div class="app">
 
-<div class="page">
-  <!-- Top bar -->
+  <!-- TOPBAR -->
   <div class="topbar">
-    <div class="topbar-left">
-      <h1 class="page-title">Ads Dashboard</h1>
-      <span class="live-pill">
-        <span class="live-dot" id="liveDot"></span>
-        en vivo
-      </span>
-    </div>
+    <span class="topbar-title">Ads Dashboard</span>
+    <span class="live-pill"><span class="live-dot"></span>Live</span>
+    <div class="topbar-spacer"></div>
     <div class="topbar-right">
-      <span class="last-upd" id="lastUpd">—</span>
-      <button class="btn btn-primary" id="refreshBtn">↻ Actualizar</button>
+      <select class="sel" id="selAccount"><option value="all">Todas las cuentas</option></select>
+      <select class="sel" id="selDate">
+        <option value="today">Hoy</option>
+        <option value="yesterday">Ayer</option>
+        <option value="7d">Últimos 7 días</option>
+        <option value="30d">Últimos 30 días</option>
+        <option value="month">Este mes</option>
+      </select>
+      <button class="btn btn-ghost" id="btnRefresh">↻ Actualizar</button>
     </div>
   </div>
 
-  <!-- Metrics -->
-  <div class="metrics">
-    <div class="metric-card">
-      <div class="metric-icon">◉</div>
-      <div class="metric-value" id="hlTotal">—</div>
-      <div class="metric-label">Cuentas</div>
-    </div>
-    <div class="metric-card good">
-      <div class="metric-icon">●</div>
-      <div class="metric-value" id="hlActive">—</div>
-      <div class="metric-label">Activas</div>
-    </div>
-    <div class="metric-card warn">
-      <div class="metric-icon">⚠</div>
-      <div class="metric-value" id="hlAlert">—</div>
-      <div class="metric-label">Con alerta</div>
-    </div>
-    <div class="metric-card bad">
-      <div class="metric-icon">↓</div>
-      <div class="metric-value" id="hlNeg">—</div>
-      <div class="metric-label">Saldo negativo</div>
-    </div>
+  <!-- SUBNAV -->
+  <div class="subnav">
+    <button class="subnav-tab active" data-view="dashboard">📊 Dashboard <span class="snav-badge" id="bnCamps">—</span></button>
+    <button class="subnav-tab" data-view="library">🎨 Biblioteca <span class="snav-badge" id="bnLib">—</span></button>
+    <button class="subnav-tab" data-view="automations">⚡ Automatizaciones <span class="snav-badge" id="bnAuto">3</span></button>
   </div>
 
-  <!-- Filter bar -->
-  <div class="filterbar">
-    <div class="filter-pills">
-      <button class="filter-pill active" data-f="all">Todas</button>
-      <button class="filter-pill" data-f="alert">Con alerta</button>
-      <button class="filter-pill" data-f="negative">Negativo</button>
-      <button class="filter-pill" data-f="paused">Pausadas</button>
-      <button class="filter-pill" data-f="active">Solo activas</button>
-    </div>
-    <div class="filter-actions">
-      <input class="search-input" id="searchBox" placeholder="Buscar cliente…">
-      <button class="btn-text-sm" id="expandAll">Expandir</button>
-      <button class="btn-text-sm" id="collapseAll">Colapsar</button>
-    </div>
-  </div>
+  <!-- CONTENT -->
+  <div class="content">
 
-  <!-- Client list -->
-  <div class="clients" id="clients">
-    <div class="empty-state"><strong>Cargando cuentas…</strong>Conectando con Meta Ads.</div>
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="metrics-row">
+        <div class="metric-card metric-card-accent">
+          <div class="metric-label">Inversión total</div>
+          <div class="metric-value" id="mSpend">—</div>
+          <div class="metric-sub"><span class="metric-tag">hoy</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Revenue atribuido</div>
+          <div class="metric-value good" id="mRevenue">—</div>
+          <div class="metric-sub"><span class="metric-tag">atribuido</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">ROAS promedio</div>
+          <div class="metric-value" id="mRoas">—</div>
+          <div class="metric-sub"><span class="metric-tag">gasto activo</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Campañas activas</div>
+          <div class="metric-value" id="mActive">—</div>
+          <div class="metric-sub"><span class="metric-tag">todas las cuentas</span></div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-title">Campañas</div>
+        <div class="pills" id="statusPills">
+          <button class="pill active" data-status="all">Todas</button>
+          <button class="pill" data-status="active">Activas</button>
+          <button class="pill" data-status="paused">Pausadas</button>
+        </div>
+        <div class="toolbar-spacer"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-col="name">Campaña <span class="sort-icon"></span></th>
+              <th data-col="clientName">Cuenta <span class="sort-icon"></span></th>
+              <th data-col="status">Estado <span class="sort-icon"></span></th>
+              <th data-col="spend" class="sorted">Gasto <span class="sort-icon">↓</span></th>
+              <th data-col="revenue">Revenue <span class="sort-icon"></span></th>
+              <th data-col="roas">ROAS <span class="sort-icon"></span></th>
+              <th data-col="results">Resultados <span class="sort-icon"></span></th>
+              <th data-col="cpr">CPR <span class="sort-icon"></span></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="campaignTable">
+            <tr><td colspan="9"><div class="state"><div class="state-ico">⏳</div><div class="state-ttl">Cargando datos…</div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="view" id="view-library">
+      <div class="toolbar" style="margin-bottom:16px">
+        <div class="toolbar-title">Biblioteca de creativos</div>
+        <div class="pills" id="libPills">
+          <button class="pill active" data-lib="all">Todos</button>
+          <button class="pill" data-lib="scale">↑ Escalar</button>
+          <button class="pill" data-lib="iterate">⟳ Iterar</button>
+          <button class="pill" data-lib="cut">✕ Cortar</button>
+        </div>
+      </div>
+      <div class="lib-grid" id="libGrid">
+        <div class="state" style="grid-column:1/-1"><div class="state-ico">⏳</div><div class="state-ttl">Cargando creativos…</div></div>
+      </div>
+    </div>
+
+    <!-- AUTOMATIONS -->
+    <div class="view" id="view-automations">
+      <div class="toolbar" style="margin-bottom:16px">
+        <div class="toolbar-title">Automatizaciones</div>
+        <div class="toolbar-spacer"></div>
+        <button class="btn btn-accent" id="btnNewAuto">+ Nueva regla</button>
+      </div>
+      <div class="auto-list">
+        <div class="auto-card">
+          <div class="auto-ico">🛑</div>
+          <div class="auto-body">
+            <div class="auto-name">Pausar si ROAS cae bajo 1×</div>
+            <div class="auto-desc">Si ROAS &lt; 1.0 por más de 2 días consecutivos → pausar campaña · Evalúa cada 24h</div>
+          </div>
+          <span class="auto-status on">Activa</span>
+          <button class="toggle on"></button>
+        </div>
+        <div class="auto-card">
+          <div class="auto-ico">⚠️</div>
+          <div class="auto-body">
+            <div class="auto-name">Alerta saldo bajo</div>
+            <div class="auto-desc">Si balance disponible &lt; $50 USD → notificar · Evalúa cada 6h</div>
+          </div>
+          <span class="auto-status on">Activa</span>
+          <button class="toggle on"></button>
+        </div>
+        <div class="auto-card">
+          <div class="auto-ico">📈</div>
+          <div class="auto-body">
+            <div class="auto-name">Alerta CPR elevado</div>
+            <div class="auto-desc">Si CPR supera el promedio histórico en 40% → notificar · Evalúa cada 12h</div>
+          </div>
+          <span class="auto-status off">Inactiva</span>
+          <button class="toggle"></button>
+        </div>
+        <button class="auto-add-btn" id="btnAddAuto">+ Agregar nueva automatización</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
-<div class="toast" id="toast"><span class="toast-dot"></span><span id="toastMsg"></span></div>
+<!-- MODAL NUEVA AUTOMATIZACIÓN -->
+<div class="modal-overlay" id="autoModal">
+  <div class="modal">
+    <div class="modal-title">Nueva automatización</div>
+    <div class="modal-sub">Definí la condición y la acción. La regla se evaluará automáticamente.</div>
+    <div class="form-row">
+      <label class="form-label">Nombre de la regla</label>
+      <input class="form-input" type="text" placeholder="Ej: Pausar si CPA supera $30">
+    </div>
+    <div class="form-cols">
+      <div class="form-row">
+        <label class="form-label">Condición</label>
+        <select class="form-input sel" style="padding-right:12px;min-width:unset;appearance:auto">
+          <option>ROAS &lt; umbral</option>
+          <option>CPR &gt; umbral</option>
+          <option>Saldo &lt; umbral</option>
+          <option>Gasto diario &gt; límite</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Valor</label>
+        <input class="form-input" type="number" placeholder="Ej: 1.5">
+      </div>
+    </div>
+    <div class="form-cols">
+      <div class="form-row">
+        <label class="form-label">Acción</label>
+        <select class="form-input sel" style="padding-right:12px;min-width:unset;appearance:auto">
+          <option>Pausar campaña</option>
+          <option>Notificar</option>
+          <option>Pausar ad set</option>
+          <option>Ajustar presupuesto</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Frecuencia</label>
+        <select class="form-input sel" style="padding-right:12px;min-width:unset;appearance:auto">
+          <option>Cada 6h</option>
+          <option>Cada 12h</option>
+          <option>Cada 24h</option>
+          <option>Cada 48h</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="btnCloseModal">Cancelar</button>
+      <button class="btn btn-accent" id="btnSaveAuto">Guardar regla</button>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ── STATE ── */
-let S = { clients:[], filter:'all', search:'', collapsed:new Set(), loading:false };
-
-/* ── THEME SYNC ── */
-(function(){
-  const t = localStorage.getItem('mkt-theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', t);
-})();
-window.addEventListener('message', e => {
-  if (e.data?.type === 'theme') document.documentElement.setAttribute('data-theme', e.data.value);
-});
-
-/* ── UTILS ── */
-function toast(msg, bad=false) {
-  const el = document.getElementById('toast');
-  el.classList.toggle('bad', bad);
-  document.getElementById('toastMsg').textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
-
-const fmt = {
-  money: (n, ccy='USD') => {
-    if (n == null || isNaN(n)) return '—';
-    const s = n < 0 ? '-' : '', a = Math.abs(n);
-    return `${s}${ccy} ${a.toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:2})}`;
-  },
-  roas:  n  => n == null || isNaN(n) || n === 0 ? '—' : `${n.toFixed(2)}×`,
-  clock: () => new Date().toLocaleTimeString('es-AR',{hour12:false}),
-  ago: d => {
-    const s = (Date.now()-d)/1000;
-    if(s<60) return 'hace '+Math.floor(s)+'s';
-    if(s<3600) return 'hace '+Math.floor(s/60)+' min';
-    return 'hace '+Math.floor(s/3600)+' h';
-  }
-};
-
-function avatarColor(name) {
-  const p=['#f5b731','#52e8b0','#60a5fa','#f97316','#e879f9','#34d399','#fb923c','#a78bfa'];
-  let h=0; for(const c of name) h=(h*31+c.charCodeAt(0))|0;
-  return p[Math.abs(h)%p.length];
-}
-function initials(name) {
-  return name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
-}
-
-/* ── DATA ── */
-async function loadAccounts() {
-  if (S.loading) return;
-  S.loading = true;
-  document.getElementById('liveDot').classList.add('loading');
-  if (S.clients.length === 0) document.getElementById('loadingOverlay').classList.add('show');
-  try {
-    const r = await fetch('/api/accounts');
-    if (!r.ok) { const e=await r.json().catch(()=>{}); throw new Error(e?.error||`Error ${r.status}`); }
-    const data = await r.json();
-    S.clients = data.clients || [];
-    if (S.collapsed.size === 0 && S.clients.length > 0) {
-      S.collapsed = new Set(S.clients.map(c=>c.id));
-    }
-    render();
-    if (data.errors?.length) toast(`${data.errors.length} cuenta(s) con error`, true);
-    else toast(`✓ ${S.clients.length} cuentas actualizadas`);
-  } catch(err) {
-    toast('Error: ' + err.message, true);
-  } finally {
-    S.loading = false;
-    document.getElementById('liveDot').classList.remove('loading');
-    document.getElementById('loadingOverlay').classList.remove('show');
-  }
-}
-
-/* ── RENDER ── */
-function render() {
-  renderMetrics();
-  renderClients();
-  document.getElementById('lastUpd').textContent = 'Actualizado ' + fmt.clock();
-}
-
-function renderMetrics() {
-  const cs = S.clients;
-  document.getElementById('hlTotal').textContent  = cs.length;
-  document.getElementById('hlActive').textContent = cs.filter(c=>c.status==='active').length;
-  document.getElementById('hlAlert').textContent  = cs.filter(c=>c.alerts.length>0).length;
-  document.getElementById('hlNeg').textContent    = cs.filter(c=>c.balance<0).length;
-}
-
-function renderClients() {
-  const box = document.getElementById('clients');
-  let cs = [...S.clients];
-  if (S.filter==='alert')    cs = cs.filter(c=>c.alerts.length>0);
-  if (S.filter==='negative') cs = cs.filter(c=>c.balance<0);
-  if (S.filter==='paused')   cs = cs.filter(c=>c.status!=='active');
-  if (S.filter==='active')   cs = cs.filter(c=>c.status==='active');
-  if (S.search) {
-    const q = S.search.toLowerCase();
-    cs = cs.filter(c=>c.name.toLowerCase().includes(q)||c.id.includes(q));
-  }
-  cs.sort((a,b)=>{
-    const aw=a.alerts.some(x=>x.level==='bad')?0:a.alerts.length?1:2;
-    const bw=b.alerts.some(x=>x.level==='bad')?0:b.alerts.length?1:2;
-    if(aw!==bw) return aw-bw;
-    return a.name.localeCompare(b.name);
+  // Theme sync
+  const savedTheme = localStorage.getItem('mkt-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  window.addEventListener('message', e => {
+    if (e.data?.type === 'theme') document.documentElement.setAttribute('data-theme', e.data.value);
   });
-  if (!cs.length) {
-    box.innerHTML = '<div class="empty-state"><strong>Sin resultados</strong>Ninguna cuenta coincide con el filtro actual.</div>';
-    return;
+
+  let allCampaigns = [];
+  let allClients   = [];
+  let sortCol = 'spend';
+  let sortDir = -1;
+  let statusFilter = 'all';
+  let libFilter = 'all';
+
+  const fmt = {
+    money: v => v >= 10000 ? `$${(v/1000).toFixed(1)}k` : v >= 1000 ? `$${(v/1000).toFixed(2)}k` : `$${Number(v).toFixed(2)}`,
+    roas:  v => Number(v).toFixed(2) + '×',
+    num:   v => Number(v).toLocaleString('es-AR'),
+  };
+
+  const roasCls = r => r >= 2.5 ? 'vgood' : r >= 1 ? 'vwarn' : 'vbad';
+  const roasClr = r => r >= 2.5 ? 'var(--good)' : r >= 1 ? 'var(--warn)' : 'var(--bad)';
+
+  function verdict(c) {
+    if (c.roas >= 2.5 && c.status === 'active') return 'scale';
+    if ((c.roas >= 1 && c.roas < 2.5) || c.status === 'paused') return 'iterate';
+    return 'cut';
   }
-  box.innerHTML = cs.map(renderClient).join('');
-  bindEvents();
-}
+  const verdictLabel = v => v === 'scale' ? '↑ Escalar' : v === 'iterate' ? '⟳ Iterar' : '✕ Cortar';
 
-function renderClient(c) {
-  const active = c.campaigns.filter(ca=>ca.status==='active');
-  const totalSpend   = active.reduce((s,ca)=>s+ca.spend,0);
-  const totalRevenue = active.reduce((s,ca)=>s+ca.revenue,0);
-  const totalResults = active.reduce((s,ca)=>s+ca.results,0);
-  const totalBudget  = active.reduce((s,ca)=>s+ca.dailyBudget,0);
-  const acctRoas = totalSpend > 0 ? totalRevenue/totalSpend : 0;
-  const acctCpr  = totalResults > 0 ? totalSpend/totalResults : 0;
-  const hasCrit  = c.alerts.some(a=>a.level==='bad');
-  const hasAlert = c.alerts.length > 0;
-  const collapsed= S.collapsed.has(c.id);
-  const roasClass= acctRoas>=2?'good':acctRoas>=1?'mid':'bad';
-  const balClass = c.balance<0?'neg':'pos';
-
-  const alertsHtml = c.alerts.map(a=>`
-    <div class="alert-row ${a.level}">
-      <span class="alert-tag">${a.level==='bad'?'Crítico':a.level==='warn'?'Aviso':'Info'}</span>
-      <span class="alert-msg"><strong>${a.title}</strong> — ${a.msg}</span>
-    </div>`).join('');
-
-  const campRows = c.campaigns.map(ca=>{
-    const rc = ca.roas>=2?'good':ca.roas>=1?'mid':ca.roas>0?'bad':'';
-    return `<tr>
-      <td><div class="camp-name">${ca.name}</div><div class="camp-obj">${(ca.objective||'').replace(/_/g,' ').toLowerCase()}</div></td>
-      <td><span class="status-badge ${ca.status}">${ca.status==='active'?'Activa':'Pausada'}</span></td>
-      <td class="r" data-label="Presup./día">${fmt.money(ca.dailyBudget,c.currency)}</td>
-      <td class="r" data-label="Gasto hoy">${fmt.money(ca.spend,c.currency)}</td>
-      <td class="r" data-label="CPR">${fmt.money(ca.cpr,c.currency)}</td>
-      <td class="r" data-label="ROAS"><span class="roas-val ${rc}">${fmt.roas(ca.roas)}</span></td>
-    </tr>`;
-  }).join('');
-
-  return `
-  <div class="client-card ${hasCrit?'has-critical':hasAlert?'has-alert':''} ${collapsed?'collapsed':''}" data-id="${c.id}">
-    <div class="card-header">
-      <div class="client-identity">
-        <div class="avatar" style="background:${avatarColor(c.name)}">${initials(c.name)}</div>
-        <div style="min-width:0">
-          <div class="client-name">${c.name}</div>
-          <div class="client-meta">
-            <span class="status-badge ${c.status}">${c.status==='active'?'Activa':c.status==='paused'?'Pausada':'Deshab.'}</span>
-            <span class="client-tag">${c.currency} · ${active.length}/${c.campaigns.length} campañas</span>
-          </div>
-        </div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Presup./día</div>
-        <div class="kpi-value">${fmt.money(totalBudget,c.currency)}</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">CPR prom.</div>
-        <div class="kpi-value">${fmt.money(acctCpr,c.currency)}</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">ROAS prom.</div>
-        <div class="kpi-value ${roasClass}">${fmt.roas(acctRoas)}</div>
-      </div>
-      <div class="kpi kpi-balance">
-        <div class="kpi-label">${c.balance<0?'Saldo negativo':'Saldo a favor'}</div>
-        <div class="kpi-value ${balClass}">${fmt.money(c.balance,c.currency)}</div>
-      </div>
-      <div class="chevron">▼</div>
-    </div>
-    <div class="card-body">
-      ${hasAlert?`<div class="alerts-list">${alertsHtml}</div>`:''}
-      <div class="camps-header">
-        <span class="camps-title">Campañas</span>
-        <span class="camps-count">${c.campaigns.length} total · ${active.length} activas · ${fmt.ago(c.lastUpdate)}</span>
-      </div>
-      <table class="camp-table">
-        <thead><tr>
-          <th>Campaña</th><th>Estado</th>
-          <th class="r">Presup./día</th><th class="r">Gasto hoy</th>
-          <th class="r">CPR</th><th class="r">ROAS</th>
-        </tr></thead>
-        <tbody>${campRows||'<tr><td colspan="6" style="color:var(--text-3);padding:16px">Sin campañas</td></tr>'}</tbody>
-      </table>
-    </div>
-  </div>`;
-}
-
-function bindEvents() {
-  document.querySelectorAll('.card-header').forEach(h=>{
-    h.addEventListener('click',()=>{
-      const card=h.closest('.client-card'), id=card.dataset.id;
-      if(S.collapsed.has(id)){S.collapsed.delete(id);card.classList.remove('collapsed');}
-      else{S.collapsed.add(id);card.classList.add('collapsed');}
+  // Sub-nav
+  document.querySelectorAll('.subnav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.subnav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('view-' + tab.dataset.view).classList.add('active');
     });
   });
-}
 
-/* ── CONTROLS ── */
-document.getElementById('refreshBtn').addEventListener('click', loadAccounts);
-document.querySelectorAll('.filter-pill').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('.filter-pill').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active'); S.filter=b.dataset.f; renderClients();
+  // Sort columns
+  document.querySelectorAll('thead th[data-col]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col;
+      if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; }
+      document.querySelectorAll('thead th').forEach(h => {
+        h.classList.remove('sorted');
+        const si = h.querySelector('.sort-icon'); if (si) si.textContent = '';
+      });
+      th.classList.add('sorted');
+      const si = th.querySelector('.sort-icon'); if (si) si.textContent = sortDir === -1 ? '↓' : '↑';
+      renderTable();
+    });
   });
-});
-document.getElementById('searchBox').addEventListener('input',e=>{S.search=e.target.value.trim();renderClients();});
-document.getElementById('expandAll').addEventListener('click',()=>{S.collapsed.clear();renderClients();});
-document.getElementById('collapseAll').addEventListener('click',()=>{S.collapsed=new Set(S.clients.map(c=>c.id));renderClients();});
 
-setInterval(()=>{ if(document.getElementById('lastUpd').textContent!=='—') document.getElementById('lastUpd').textContent='Actualizado '+fmt.clock(); },1000);
-setInterval(loadAccounts, 5*60*1000);
+  // Status pills
+  document.querySelectorAll('#statusPills .pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('#statusPills .pill').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      statusFilter = p.dataset.status;
+      renderTable();
+    });
+  });
 
-loadAccounts();
+  // Lib pills
+  document.querySelectorAll('#libPills .pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('#libPills .pill').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      libFilter = p.dataset.lib;
+      renderLibrary();
+    });
+  });
+
+  document.getElementById('selAccount').addEventListener('change', () => { renderTable(); renderLibrary(); });
+  document.getElementById('btnRefresh').addEventListener('click', loadData);
+
+  // Toggles
+  document.querySelectorAll('.toggle').forEach(t => {
+    t.addEventListener('click', () => {
+      t.classList.toggle('on');
+      const st = t.previousElementSibling;
+      if (t.classList.contains('on')) { st.textContent = 'Activa'; st.className = 'auto-status on'; }
+      else { st.textContent = 'Inactiva'; st.className = 'auto-status off'; }
+    });
+  });
+
+  // Modal
+  const modal = document.getElementById('autoModal');
+  const openModal = () => modal.classList.add('open');
+  const closeModal = () => modal.classList.remove('open');
+  document.getElementById('btnNewAuto').addEventListener('click', openModal);
+  document.getElementById('btnAddAuto').addEventListener('click', openModal);
+  document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+  document.getElementById('btnSaveAuto').addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  // Render table
+  function renderTable() {
+    const acct = document.getElementById('selAccount').value;
+    let rows = [...allCampaigns];
+    if (statusFilter !== 'all') rows = rows.filter(r => r.status === statusFilter);
+    if (acct !== 'all') rows = rows.filter(r => r.clientId === acct);
+
+    rows.sort((a, b) => {
+      const av = a[sortCol] ?? '', bv = b[sortCol] ?? '';
+      if (typeof av === 'string') return av.localeCompare(bv) * sortDir;
+      return (av - bv) * sortDir;
+    });
+
+    const tbody = document.getElementById('campaignTable');
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="state"><div class="state-ico">🔍</div><div class="state-ttl">Sin resultados</div><div class="state-sub">Probá cambiar los filtros.</div></div></td></tr>`;
+      return;
+    }
+
+    const maxRoas = Math.max(...rows.map(r => r.roas), 4);
+    const objIco = {'Conversiones':'📋','Reconocimiento':'📣','Leads':'📝','Tráfico':'🌐'};
+
+    tbody.innerHTML = rows.map(r => {
+      const rPct = Math.min((r.roas / maxRoas) * 100, 100);
+      const statusLabel = r.status === 'active' ? 'Activa' : r.status === 'paused' ? 'Pausada' : 'Desactivada';
+      return `<tr>
+        <td>
+          <div class="c-name">
+            <div class="c-icon">${objIco[r.objective] || '📋'}</div>
+            <div>
+              <div class="c-name-text" title="${r.name}">${r.name}</div>
+              <div class="c-name-sub">${r.objective || 'Conversiones'}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="c-account" title="${r.clientName}">${r.clientName}</span></td>
+        <td><span class="badge ${r.status}"><span class="bdot"></span>${statusLabel}</span></td>
+        <td class="val">${fmt.money(r.spend)}</td>
+        <td class="${r.revenue > 0 ? 'val' : ''}">${r.revenue > 0 ? fmt.money(r.revenue) : '<span style="color:var(--text-3)">—</span>'}</td>
+        <td>
+          <div class="roas-wrap">
+            <span class="${r.roas > 0 ? roasCls(r.roas) : ''}">${r.roas > 0 ? fmt.roas(r.roas) : '<span style="color:var(--text-3)">—</span>'}</span>
+            <div class="roas-bar-bg"><div class="roas-bar-fill" style="width:${rPct}%;background:${roasClr(r.roas)}"></div></div>
+          </div>
+        </td>
+        <td class="val">${fmt.num(r.results)}</td>
+        <td class="${r.cpr > 0 ? roasCls(3/r.cpr) : ''}">${r.cpr > 0 ? fmt.money(r.cpr) : '<span style="color:var(--text-3)">—</span>'}</td>
+        <td>
+          <div class="row-actions">
+            <button class="ract" title="Ver en Meta">↗</button>
+            <button class="ract" title="${r.status === 'active' ? 'Pausar' : 'Activar'}">${r.status === 'active' ? '⏸' : '▶'}</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Render library
+  function renderLibrary() {
+    const acct = document.getElementById('selAccount').value;
+    const objIco = {'Conversiones':'📋','Reconocimiento':'📣','Leads':'📝','Tráfico':'🌐'};
+    let camps = allClients.flatMap(c => (c.campaigns || []).map(cam => ({...cam, clientId: c.id, clientName: c.name})));
+    if (acct !== 'all') camps = camps.filter(c => c.clientId === acct);
+    if (libFilter !== 'all') camps = camps.filter(c => verdict(c) === libFilter);
+
+    const grid = document.getElementById('libGrid');
+    if (!camps.length) {
+      grid.innerHTML = `<div class="state" style="grid-column:1/-1"><div class="state-ico">🎨</div><div class="state-ttl">Sin creativos</div><div class="state-sub">Conectá tus cuentas para ver los creativos.</div></div>`;
+      return;
+    }
+
+    grid.innerHTML = camps.map(c => {
+      const v = verdict(c);
+      return `<div class="creative-card">
+        <div class="creative-thumb">
+          ${objIco[c.objective] || '📋'}
+          <div class="creative-badge-overlay">
+            <span class="badge ${c.status}" style="font-size:10px"><span class="bdot"></span>${c.status === 'active' ? 'Activa' : 'Pausada'}</span>
+          </div>
+        </div>
+        <div class="creative-body">
+          <div class="creative-name" title="${c.name}">${c.name}</div>
+          <div class="creative-acct">${c.clientName}</div>
+          <div class="creative-stats">
+            <div><div class="cstat-val">${fmt.money(c.spend)}</div><div class="cstat-lbl">Gasto</div></div>
+            <div><div class="cstat-val ${c.roas > 0 ? roasCls(c.roas) : ''}">${c.roas > 0 ? fmt.roas(c.roas) : '—'}</div><div class="cstat-lbl">ROAS</div></div>
+            <div><div class="cstat-val">${fmt.num(c.results)}</div><div class="cstat-lbl">Results</div></div>
+          </div>
+          <span class="verdict ${v}">${verdictLabel(v)}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Load from API
+  async function loadData() {
+    const btn = document.getElementById('btnRefresh');
+    btn.textContent = '↻ Cargando…'; btn.disabled = true;
+    try {
+      const res  = await fetch('/api/accounts');
+      const data = await res.json();
+      if (!data.ok || !data.clients?.length) throw new Error(data.error || 'Sin cuentas');
+
+      allClients = data.clients;
+      const sel = document.getElementById('selAccount');
+      sel.innerHTML = '<option value="all">Todas las cuentas</option>' +
+        data.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+      allCampaigns = data.clients.flatMap(c =>
+        (c.campaigns || []).map(cam => ({...cam, clientId: c.id, clientName: c.name}))
+      );
+      updateMetrics(); renderTable(); renderLibrary();
+    } catch (err) {
+      console.warn('API unavailable, using demo data:', err.message);
+      loadDemoData();
+    } finally {
+      btn.textContent = '↻ Actualizar'; btn.disabled = false;
+    }
+  }
+
+  function updateMetrics() {
+    const active  = allCampaigns.filter(c => c.status === 'active');
+    const spend   = active.reduce((s,c) => s + c.spend, 0);
+    const revenue = active.reduce((s,c) => s + c.revenue, 0);
+    const roas    = spend > 0 ? revenue / spend : 0;
+
+    document.getElementById('mSpend').textContent   = fmt.money(spend);
+    document.getElementById('mRevenue').textContent = fmt.money(revenue);
+    const roasEl = document.getElementById('mRoas');
+    roasEl.textContent = roas > 0 ? fmt.roas(roas) : '—';
+    roasEl.className = 'metric-value ' + (roas >= 2.5 ? 'good' : roas >= 1 ? 'warn' : roas > 0 ? 'bad' : '');
+    document.getElementById('mActive').textContent  = active.length;
+    document.getElementById('bnCamps').textContent  = allCampaigns.length;
+    document.getElementById('bnLib').textContent    = allCampaigns.length;
+  }
+
+  function loadDemoData() {
+    const DEMO = [
+      {name:'Prospecting · Lookalike 2%',         objective:'Conversiones',  status:'active',  spend:1240,revenue:4340,roas:3.5, results:87, cpr:14.25, clientId:'d1',clientName:'Empresa Alfa'},
+      {name:'Retargeting 30d · Carrito',           objective:'Conversiones',  status:'active',  spend:890, revenue:3115,roas:3.5, results:62, cpr:14.35, clientId:'d1',clientName:'Empresa Alfa'},
+      {name:'Brand Awareness · Video 15s',         objective:'Reconocimiento',status:'active',  spend:340, revenue:0,   roas:0,   results:0,  cpr:0,     clientId:'d2',clientName:'Empresa Beta'},
+      {name:'Conversiones · Cold Traffic',         objective:'Conversiones',  status:'paused',  spend:220, revenue:176, roas:0.8, results:8,  cpr:27.5,  clientId:'d2',clientName:'Empresa Beta'},
+      {name:'Lead Gen · Formulario nativo',        objective:'Leads',         status:'active',  spend:670, revenue:2010,roas:3.0, results:134,cpr:5.0,   clientId:'d3',clientName:'Empresa Gamma'},
+      {name:'Catálogo · Dinámica DPA',             objective:'Conversiones',  status:'active',  spend:510, revenue:1428,roas:2.8, results:41, cpr:12.44, clientId:'d3',clientName:'Empresa Gamma'},
+      {name:'Prospecting · Intereses fríos',       objective:'Conversiones',  status:'paused',  spend:130, revenue:78,  roas:0.6, results:3,  cpr:43.33, clientId:'d1',clientName:'Empresa Alfa'},
+    ];
+    allCampaigns = DEMO;
+    allClients = [
+      {id:'d1',name:'Empresa Alfa', campaigns:DEMO.filter(c=>c.clientId==='d1')},
+      {id:'d2',name:'Empresa Beta', campaigns:DEMO.filter(c=>c.clientId==='d2')},
+      {id:'d3',name:'Empresa Gamma',campaigns:DEMO.filter(c=>c.clientId==='d3')},
+    ];
+    const sel = document.getElementById('selAccount');
+    sel.innerHTML = '<option value="all">Todas las cuentas</option>' +
+      allClients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    updateMetrics(); renderTable(); renderLibrary();
+  }
+
+  loadData();
 </script>
 </body>
 </html>
