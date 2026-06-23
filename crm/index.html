@@ -6,13 +6,127 @@
     <title>MKT Consultora - CRM</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Cuando el CRM está dentro del shell (iframe), ocultar el header propio */
+        /* ── IFRAME: ocultar header propio ── */
         body.in-iframe .header { display: none !important; }
         body.in-iframe .nav { top: 0; }
+
+        /* ── LIGHT MODE OVERRIDES ────────────────────────────────── */
+        body.theme-light {
+            background: #f0effa !important;
+            color: #1a1828 !important;
+        }
+        /* Nav */
+        body.theme-light .nav {
+            background: #ffffff !important;
+            border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+            backdrop-filter: none !important;
+        }
+        body.theme-light .nav-btn {
+            background: #f4f3fc !important;
+            color: #1a1828 !important;
+            border: 1px solid rgba(0,0,0,0.1) !important;
+        }
+        body.theme-light .nav-btn:hover {
+            background: rgba(230,51,132,0.06) !important;
+            color: #e63384 !important;
+        }
+        body.theme-light .nav-btn.active {
+            background: rgba(230,51,132,0.10) !important;
+            color: #e63384 !important;
+            border-color: rgba(230,51,132,0.3) !important;
+            box-shadow: none !important;
+        }
+        /* Stat cards */
+        body.theme-light .stat-card {
+            background: #ffffff !important;
+            border: 1px solid rgba(0,0,0,0.08) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+            backdrop-filter: none !important;
+        }
+        body.theme-light .stat-card:hover {
+            background: #fff !important;
+            box-shadow: 0 6px 20px rgba(230,51,132,0.12) !important;
+            transform: translateY(-4px) !important;
+        }
+        body.theme-light .stat-label { color: #5a5778 !important; }
+        /* Client cards */
+        body.theme-light .client-card {
+            background: #ffffff !important;
+            border: 1px solid rgba(0,0,0,0.08) !important;
+            border-left: 4px solid #e63384 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+            backdrop-filter: none !important;
+        }
+        body.theme-light .client-card:hover {
+            background: #fff !important;
+            box-shadow: 0 8px 24px rgba(230,51,132,0.14) !important;
+        }
+        body.theme-light .client-name,
+        body.theme-light .client-email { color: #1a1828 !important; }
+        /* Text elements */
+        body.theme-light h2,
+        body.theme-light h3,
+        body.theme-light h4,
+        body.theme-light p,
+        body.theme-light span:not(.stat-number),
+        body.theme-light label,
+        body.theme-light .loading { color: #1a1828 !important; text-shadow: none !important; }
+        /* Forms / filters */
+        body.theme-light .planner-filtros,
+        body.theme-light [class*="filtro"],
+        body.theme-light [class*="filter"] {
+            background: #ffffff !important;
+            border-color: rgba(0,0,0,0.08) !important;
+        }
+        body.theme-light select,
+        body.theme-light input,
+        body.theme-light textarea {
+            background: #ffffff !important;
+            color: #1a1828 !important;
+            border-color: rgba(0,0,0,0.18) !important;
+        }
+        body.theme-light select option { background: #ffffff !important; color: #1a1828 !important; }
+        /* Tables */
+        body.theme-light table  { background: #ffffff !important; }
+        body.theme-light th     { background: #f4f3fc !important; color: #5a5778 !important; border-color: rgba(0,0,0,0.08) !important; }
+        body.theme-light td     { color: #1a1828 !important; border-color: rgba(0,0,0,0.06) !important; }
+        body.theme-light tr:hover > td { background: #f8f7fd !important; }
+        /* Generic backgrounds */
+        body.theme-light [style*="rgba(255, 255, 255, 0.0"],
+        body.theme-light [style*="rgba(255,255,255,0.0"] {
+            background: #ffffff !important;
+        }
+        body.theme-light [class*="card"],
+        body.theme-light [class*="box"],
+        body.theme-light [class*="panel"],
+        body.theme-light [class*="section"],
+        body.theme-light [class*="modal"],
+        body.theme-light [class*="form"],
+        body.theme-light [class*="container"] {
+            background: #ffffff !important;
+            color: #1a1828 !important;
+            backdrop-filter: none !important;
+        }
+        body.theme-light .success-box { background: rgba(14,164,112,0.08) !important; color: #0ea470 !important; }
+        body.theme-light .error-box   { background: rgba(220,38,38,0.08) !important;  color: #dc2626 !important; }
+        body.theme-light .filtro-grupo label { color: #e63384 !important; }
+        body.theme-light .btn-clonar { background: #f4f3fc !important; color: #1a1828 !important; border-color: rgba(0,0,0,0.1) !important; }
+        body.theme-light .spinner { border-color: rgba(0,0,0,0.1) !important; border-top-color: #e63384 !important; }
     </style>
     <script>
-        if (window !== window.top) document.addEventListener('DOMContentLoaded', function() {
-            document.body.classList.add('in-iframe');
+        function applyThemeCRM(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            document.body.classList.toggle('theme-light', t === 'light');
+        }
+        // Aplicar tema guardado al cargar
+        const _savedTheme = localStorage.getItem('mkt-theme') || 'dark';
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window !== window.top) document.body.classList.add('in-iframe');
+            applyThemeCRM(_savedTheme);
+        });
+        // Escuchar cambios desde el shell
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'theme') applyThemeCRM(e.data.value);
         });
     </script>
     <style>
