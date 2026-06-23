@@ -112,6 +112,82 @@
         body.theme-light .filtro-grupo label { color: #e63384 !important; }
         body.theme-light .btn-clonar { background: #f4f3fc !important; color: #1a1828 !important; border-color: rgba(0,0,0,0.1) !important; }
         body.theme-light .spinner { border-color: rgba(0,0,0,0.1) !important; border-top-color: #e63384 !important; }
+
+        /* ── SEMANA DE PUBLICACIONES ──────────────────────────────── */
+        .semana-wrap {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(230,51,132,0.2);
+            border-radius: 12px; padding: 20px; margin-bottom: 24px;
+        }
+        .semana-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px;
+        }
+        .semana-title {
+            font-size: 12px; font-weight: 700; letter-spacing: .1em;
+            text-transform: uppercase; color: #e63384;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .semana-title::before {
+            content: ''; width: 8px; height: 8px; border-radius: 50%;
+            background: #e63384; display: inline-block; box-shadow: 0 0 6px #e63384;
+        }
+        .semana-fecha { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 500; }
+        .semana-grid {
+            display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+            overflow-x: auto;
+        }
+        .dia-col { min-width: 130px; }
+        .dia-head {
+            text-align: center; padding: 8px 4px 10px; margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .dia-nombre {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            color: rgba(255,255,255,0.35); letter-spacing: .1em;
+        }
+        .dia-num { font-size: 22px; font-weight: 800; color: #fff; margin-top: 3px; line-height: 1; }
+        .dia-col.hoy .dia-nombre { color: #e63384; }
+        .dia-col.hoy .dia-num    { color: #e63384; }
+        .dia-vacio { text-align: center; padding: 14px 0; font-size: 11px; color: rgba(255,255,255,0.15); }
+        .pub-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px; padding: 10px 11px; margin-bottom: 8px;
+        }
+        .pub-cliente {
+            font-size: 11px; font-weight: 700; color: #e63384;
+            margin-bottom: 5px; letter-spacing: .04em;
+        }
+        .pub-tipo {
+            display: inline-block; font-size: 9px; font-weight: 700;
+            padding: 2px 6px; border-radius: 3px; letter-spacing: .06em;
+            background: rgba(230,51,132,0.15); color: rgba(255,255,255,0.55);
+            margin-bottom: 5px;
+        }
+        .pub-titulo {
+            font-size: 11px; color: rgba(255,255,255,0.65); line-height: 1.35;
+            margin-bottom: 7px; overflow: hidden; display: -webkit-box;
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        }
+        .pub-status { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+        .pub-status.listo     { background: rgba(82,232,176,0.15); color: #52e8b0; }
+        .pub-status.pendiente { background: rgba(245,183,49,0.15); color: #f5b731; }
+
+        /* Light mode — semana */
+        body.theme-light .semana-wrap { background: #ffffff !important; border-color: rgba(230,51,132,0.12) !important; }
+        body.theme-light .semana-fecha { color: #9a97b8 !important; }
+        body.theme-light .dia-nombre   { color: #9a97b8 !important; }
+        body.theme-light .dia-num      { color: #1a1828 !important; }
+        body.theme-light .dia-col.hoy .dia-nombre,
+        body.theme-light .dia-col.hoy .dia-num { color: #e63384 !important; }
+        body.theme-light .dia-head  { border-bottom-color: rgba(0,0,0,0.07) !important; }
+        body.theme-light .pub-card  { background: #f8f7fd !important; border-color: rgba(0,0,0,0.07) !important; }
+        body.theme-light .pub-titulo{ color: #5a5778 !important; }
+        body.theme-light .pub-tipo  { background: rgba(230,51,132,0.08) !important; color: #e63384 !important; }
+        body.theme-light .dia-vacio { color: rgba(0,0,0,0.15) !important; }
+        body.theme-light .pub-status.listo     { background: rgba(14,164,112,0.10) !important; color: #0ea470 !important; }
+        body.theme-light .pub-status.pendiente { background: rgba(196,143,12,0.10) !important; color: #c48f0c !important; }
     </style>
     <script>
         function applyThemeCRM(t) {
@@ -1916,16 +1992,148 @@
                 </div>
             </div>
 
-            <!-- TICKER: lo que se publica hoy -->
-            <div class="ticker-wrap">
-                <div class="ticker-header">
-                    <div class="ticker-title">SE PUBLICA HOY</div>
-                    <div class="ticker-fecha" id="ticker-fecha"></div>
+            <!-- SEMANA DE PUBLICACIONES -->
+            <div class="semana-wrap">
+                <div class="semana-header">
+                    <div class="semana-title">SE PUBLICA ESTA SEMANA</div>
+                    <div class="semana-fecha">Jun 22 – 28, 2026</div>
                 </div>
-                <div class="ticker-strip" id="ticker-strip">
-                    <div class="ticker-track" id="ticker-track"></div>
-                </div>
-            </div>
+                <div class="semana-grid">
+
+                    <!-- LUN 22 -->
+                    <div class="dia-col">
+                        <div class="dia-head">
+                            <div class="dia-nombre">Lun</div>
+                            <div class="dia-num">22</div>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">AO</div>
+                            <span class="pub-tipo">CARRUSEL</span>
+                            <div class="pub-titulo">"Lo que entra en contacto con tu comida importa"</div>
+                            <span class="pub-status listo">Listo</span>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">NIGRUM</div>
+                            <span class="pub-tipo">REEL</span>
+                            <div class="pub-titulo">"Nueva colección otoño-invierno"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                    </div>
+
+                    <!-- MAR 23 -->
+                    <div class="dia-col hoy">
+                        <div class="dia-head">
+                            <div class="dia-nombre">Mar ·hoy</div>
+                            <div class="dia-num">23</div>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">FB SEGUROS</div>
+                            <span class="pub-tipo">REEL</span>
+                            <div class="pub-titulo">"El test que cambia TODO en un siniestro"</div>
+                            <span class="pub-status listo">Listo</span>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">HAUSBROT</div>
+                            <span class="pub-tipo">CARRUSEL</span>
+                            <div class="pub-titulo">"Pan integral de masa madre"</div>
+                            <span class="pub-status listo">Listo</span>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">M&amp;T</div>
+                            <span class="pub-tipo">POST</span>
+                            <div class="pub-titulo">"Oferta de la semana en servicios"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                    </div>
+
+                    <!-- MIE 24 -->
+                    <div class="dia-col">
+                        <div class="dia-head">
+                            <div class="dia-nombre">Mié</div>
+                            <div class="dia-num">24</div>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">AO</div>
+                            <span class="pub-tipo">STORY</span>
+                            <div class="pub-titulo">"Beneficios del acero inoxidable en cocina"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">KINEBS</div>
+                            <span class="pub-tipo">REEL</span>
+                            <div class="pub-titulo">"Rutina de kinesiología postural"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                    </div>
+
+                    <!-- JUE 25 -->
+                    <div class="dia-col">
+                        <div class="dia-head">
+                            <div class="dia-nombre">Jue</div>
+                            <div class="dia-num">25</div>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">NIGRUM</div>
+                            <span class="pub-tipo">CARRUSEL</span>
+                            <div class="pub-titulo">"Lookbook invierno 2026"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">FB SEGUROS</div>
+                            <span class="pub-tipo">POST</span>
+                            <div class="pub-titulo">"Tips para cuidar tu auto en invierno"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">OSMEDICA</div>
+                            <span class="pub-tipo">STORY</span>
+                            <div class="pub-titulo">"Turnos disponibles esta semana"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                    </div>
+
+                    <!-- VIE 26 -->
+                    <div class="dia-col">
+                        <div class="dia-head">
+                            <div class="dia-nombre">Vie</div>
+                            <div class="dia-num">26</div>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">HAUSBROT</div>
+                            <span class="pub-tipo">REEL</span>
+                            <div class="pub-titulo">"Proceso de elaboración del pan artesanal"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">M&amp;T</div>
+                            <span class="pub-tipo">CARRUSEL</span>
+                            <div class="pub-titulo">"Catálogo completo de servicios"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                    </div>
+
+                    <!-- SAB 27 -->
+                    <div class="dia-col">
+                        <div class="dia-head">
+                            <div class="dia-nombre">Sáb</div>
+                            <div class="dia-num">27</div>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">AO</div>
+                            <span class="pub-tipo">POST</span>
+                            <div class="pub-titulo">"Fin de semana de descuentos especiales"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                        <div class="pub-card">
+                            <div class="pub-cliente">KINEBS</div>
+                            <span class="pub-tipo">STORY</span>
+                            <div class="pub-titulo">"Consejos de bienestar para el fin de semana"</div>
+                            <span class="pub-status pendiente">Pendiente</span>
+                        </div>
+                    </div>
+
+                </div><!-- /semana-grid -->
+            </div><!-- /semana-wrap -->
 
             <!-- RESUMEN URGENTES -->
             <div class="urgentes-wrap">
