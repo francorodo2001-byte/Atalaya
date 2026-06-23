@@ -16,9 +16,9 @@
     --surface-3:   #232145;
     --border:      rgba(255,255,255,0.06);
     --border-2:    rgba(255,255,255,0.10);
-    --text:        #e4e2f5;
-    --text-2:      #8a87b0;
-    --text-3:      #504e70;
+    --text:        #ffffff;
+    --text-2:      #c4c0e4;
+    --text-3:      #7a77a0;
     --accent:      #f5b731;
     --accent-dim:  rgba(245,183,49,0.12);
     --accent-glow: rgba(245,183,49,0.25);
@@ -208,7 +208,7 @@
       </button>
       <button class="nav-item" id="tabCrm">
         <span class="nav-icon-wrap">🗂</span>
-        CRM
+        MKT Dashboard
       </button>
     </nav>
 
@@ -236,6 +236,13 @@
     const isDark = t === 'dark';
     document.getElementById('themeIcon').textContent  = isDark ? '🌙' : '☀️';
     document.getElementById('themeLabel').textContent = isDark ? 'Modo oscuro' : 'Modo claro';
+    // CRM tiene fondo hardcodeado oscuro — aclararlo en modo claro
+    const frame = document.getElementById('mainFrame');
+    if (!isDark && current === 'crm') {
+      frame.style.filter = 'brightness(1.55) contrast(0.82) saturate(0.35)';
+    } else {
+      frame.style.filter = '';
+    }
   }
 
   document.getElementById('themeToggle').addEventListener('click', () => {
@@ -250,7 +257,12 @@
     current = tab;
     document.getElementById('tabAds').classList.toggle('active', tab === 'ads');
     document.getElementById('tabCrm').classList.toggle('active', tab === 'crm');
-    document.getElementById('mainFrame').src = tab === 'ads' ? '/ads' : '/crm';
+    const frame = document.getElementById('mainFrame');
+    frame.src = tab === 'ads' ? '/ads' : '/crm';
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    frame.style.filter = (isLight && tab === 'crm')
+      ? 'brightness(1.55) contrast(0.82) saturate(0.35)'
+      : '';
   }
 
   document.getElementById('tabAds').addEventListener('click', () => switchTab('ads'));
