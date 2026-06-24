@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MKT Consultora - CRM</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <style>
         /* ── IFRAME: ocultar header propio ── */
         body.in-iframe .header { display: none !important; }
@@ -234,6 +235,180 @@
             border-color: rgba(0,0,0,0.12) !important;
             color: #9a97b8 !important;
         }
+
+        /* ── NUEVO KANBAN (4 columnas de estado) ─────────────────── */
+        .kanban-board {
+            display: grid; grid-template-columns: repeat(4,1fr);
+            gap: 12px; align-items: start;
+        }
+        .kanban-col {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px; padding: 12px;
+        }
+        .kanban-col-header {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 12px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--kb-color, #e63384);
+        }
+        .kanban-col-dot {
+            width: 9px; height: 9px; border-radius: 50%;
+            background: var(--kb-color, #e63384); flex-shrink: 0;
+        }
+        .kanban-col-name {
+            font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .08em; color: rgba(255,255,255,0.7); flex: 1;
+        }
+        .kanban-col-count {
+            font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.07); padding: 1px 7px;
+            border-radius: 20px;
+        }
+        .kanban-cards { min-height: 60px; }
+        .kanban-cards.drag-over { background: rgba(255,255,255,0.04); border-radius: 8px; }
+
+        .kb-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-left: 3px solid var(--kb-color, #e63384);
+            border-radius: 8px; padding: 10px 12px;
+            margin-bottom: 8px; cursor: pointer;
+            transition: all .15s; user-select: none;
+        }
+        .kb-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+        .kb-card.dragging { opacity: .4; }
+        .kb-card-title { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.35; margin-bottom: 7px; }
+        .kb-card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .kb-tag {
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            padding: 1px 6px; border-radius: 3px; letter-spacing: .05em;
+        }
+        .kb-tag-client  { background: rgba(230,51,132,0.15); color: #ff6bb5; }
+        .kb-tag-alta    { background: rgba(244,67,54,0.18);  color: #ef5350; }
+        .kb-tag-media   { background: rgba(255,193,7,0.15);  color: #ffc107; }
+        .kb-tag-baja    { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.45); }
+        .kb-due         { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.4); margin-left: auto; }
+        .kb-due.late    { color: #ef5350; }
+        .kb-due.today   { color: #ffc107; }
+        .kb-icons       { display: flex; gap: 4px; margin-top: 5px; }
+        .kb-icon        { font-size: 10px; color: rgba(255,255,255,0.3); }
+        .kb-recur       { font-size: 10px; color: rgba(255,193,7,0.6); }
+
+        .kanban-add-btn {
+            width: 100%; background: none; border: 1px dashed rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.3); border-radius: 6px; padding: 8px;
+            font-size: 12px; cursor: pointer; transition: all .15s;
+            font-family: inherit; margin-top: 4px;
+        }
+        .kanban-add-btn:hover { border-color: rgba(255,255,255,0.25); color: rgba(255,255,255,0.6); }
+
+        /* Modal de tarea nuevo */
+        .kt-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .kt-modal {
+            background: #1c1b38; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; width: 640px; max-width: 96vw; max-height: 90vh;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .kt-modal-head {
+            display: flex; align-items: center; gap: 10px;
+            padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.07);
+            flex-shrink: 0;
+        }
+        .kt-modal-head input {
+            flex: 1; background: none; border: none; outline: none;
+            color: #fff; font-size: 16px; font-weight: 700;
+            font-family: inherit; placeholder-color: rgba(255,255,255,0.3);
+        }
+        .kt-status-dot {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+        }
+        .kt-modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+        .kt-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .kt-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .kt-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+        .kt-field label { font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .08em; color: rgba(255,255,255,0.4); }
+        .kt-field input, .kt-field select, .kt-field textarea {
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 7px; padding: 8px 10px; color: #fff; font-family: inherit;
+            font-size: 13px; outline: none; transition: border-color .15s;
+        }
+        .kt-field input:focus, .kt-field select, .kt-field textarea:focus {
+            border-color: rgba(230,51,132,0.5);
+        }
+        .kt-field select option { background: #1c1b38; }
+        .kt-field textarea { resize: vertical; min-height: 70px; }
+        .kt-recur-wrap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .kt-recur-extra { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        /* Links chips */
+        .kt-links-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+        .kt-link-chip {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3);
+            border-radius: 5px; padding: 3px 8px; font-size: 11px; color: #93c5fd;
+            text-decoration: none; max-width: 220px; overflow: hidden; white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .kt-link-chip:hover { background: rgba(96,165,250,0.25); }
+        .kt-link-chip-del {
+            cursor: pointer; color: rgba(255,255,255,0.3); font-size: 12px; line-height: 1;
+            background: none; border: none; padding: 0; margin-left: 2px;
+        }
+        .kt-link-chip-del:hover { color: #ef5350; }
+        .kt-link-loading { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+
+        /* Attachments */
+        .kt-attach-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+        .kt-attach-chip {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 5px; padding: 3px 8px; font-size: 11px; color: rgba(255,255,255,0.65);
+            text-decoration: none; max-width: 200px; overflow: hidden; white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .kt-attach-chip:hover { background: rgba(255,255,255,0.12); }
+
+        .kt-modal-foot {
+            display: flex; align-items: center; gap: 8px;
+            padding: 12px 20px; border-top: 1px solid rgba(255,255,255,0.07);
+            flex-shrink: 0;
+        }
+        .kt-btn-del  { background: none; border: none; color: #ef5350; font-size: 12px;
+                        font-family: inherit; cursor: pointer; padding: 7px 10px; border-radius: 6px; }
+        .kt-btn-del:hover { background: rgba(244,67,54,0.12); }
+        .kt-btn-cancel { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+                          color: rgba(255,255,255,0.7); font-family: inherit; font-size: 13px;
+                          cursor: pointer; padding: 7px 16px; border-radius: 7px; margin-left: auto; }
+        .kt-btn-save { background: #e63384; border: none; color: #fff; font-family: inherit;
+                        font-size: 13px; font-weight: 700; cursor: pointer;
+                        padding: 7px 18px; border-radius: 7px; }
+        .kt-btn-save:hover { background: #d1226f; }
+
+        /* Light mode — Kanban */
+        body.theme-light .kanban-col { background: #f4f3fc !important; border-color: rgba(0,0,0,0.07) !important; }
+        body.theme-light .kanban-col-name { color: #5a5778 !important; }
+        body.theme-light .kanban-col-count { background: rgba(0,0,0,0.05) !important; color: #9a97b8 !important; }
+        body.theme-light .kb-card { background: #ffffff !important; border-color: rgba(0,0,0,0.08) !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; }
+        body.theme-light .kb-card:hover { background: #f8f7fd !important; }
+        body.theme-light .kb-card-title { color: #1a1828 !important; }
+        body.theme-light .kb-due { color: #9a97b8 !important; }
+        body.theme-light .kanban-add-btn { border-color: rgba(0,0,0,0.12) !important; color: #9a97b8 !important; }
+        body.theme-light .kanban-add-btn:hover { border-color: rgba(0,0,0,0.25) !important; color: #5a5778 !important; }
+        body.theme-light .kt-modal { background: #ffffff !important; border-color: rgba(0,0,0,0.1) !important; }
+        body.theme-light .kt-modal-head { border-bottom-color: rgba(0,0,0,0.07) !important; }
+        body.theme-light .kt-modal-head input { color: #1a1828 !important; }
+        body.theme-light .kt-field input, body.theme-light .kt-field select, body.theme-light .kt-field textarea {
+            background: #f4f3fc !important; border-color: rgba(0,0,0,0.12) !important; color: #1a1828 !important;
+        }
+        body.theme-light .kt-field select option { background: #ffffff !important; }
+        body.theme-light .kt-field label { color: #9a97b8 !important; }
+        body.theme-light .kt-modal-foot { border-top-color: rgba(0,0,0,0.07) !important; }
+        body.theme-light .kt-btn-cancel { background: #f4f3fc !important; border-color: rgba(0,0,0,0.1) !important; color: #5a5778 !important; }
     </style>
     <script>
         function applyThemeCRM(t) {
@@ -2193,77 +2368,7 @@
                 <div id="urgentes-resumen" class="urgentes-grid"></div>
             </div>
 
-            <!-- Modal nueva/editar tarea -->
-            <div id="modal-tarea" class="modal-overlay" style="display:none">
-                <div class="modal-box" style="width:560px">
-                    <div class="modal-header">
-                        <span id="modal-tarea-titulo">Nueva tarea</span>
-                        <button onclick="cerrarModalTarea()" class="modal-close">X</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="campo-grupo">
-                            <label>Título de la tarea</label>
-                            <input type="text" id="t-titulo" placeholder="Ej: Editar reel de Hausbrot del 23/5">
-                        </div>
-                        <div class="modal-fila2" style="grid-template-columns: 1fr 1fr 1fr">
-                            <div class="campo-grupo">
-                                <label>Asignada a</label>
-                                <select id="t-persona">
-                                    <option>Micaela</option>
-                                    <option>Pilar</option>
-                                    <option>Pedro</option>
-                                    <option>Rocío</option>
-                                </select>
-                            </div>
-                            <div class="campo-grupo">
-                                <label>Cliente</label>
-                                <select id="t-cliente">
-                                    <option value="">— Sin cliente —</option>
-                                    <option>Aberturas Patti</option>
-                                    <option>AO</option>
-                                    <option>FB SEGUROS</option>
-                                    <option>HAUSBROT</option>
-                                    <option>KINEBS</option>
-                                    <option>M&amp;T</option>
-                                    <option>NIGRUM</option>
-                                    <option>OSMEDICA</option>
-                                </select>
-                            </div>
-                            <div class="campo-grupo">
-                                <label>Vence</label>
-                                <input type="date" id="t-vence">
-                            </div>
-                        </div>
-                        <div class="modal-fila2" style="grid-template-columns: 1fr 1fr">
-                            <div class="campo-grupo">
-                                <label>Prioridad</label>
-                                <select id="t-prioridad">
-                                    <option value="alta">Alta</option>
-                                    <option value="media" selected>Media</option>
-                                    <option value="baja">Baja</option>
-                                </select>
-                            </div>
-                            <div class="campo-grupo">
-                                <label>Estado</label>
-                                <select id="t-estado">
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="en-curso">En curso</option>
-                                    <option value="hecha">Hecha</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="campo-grupo">
-                            <label>Notas (opcional)</label>
-                            <textarea id="t-notas" rows="3" placeholder="Detalles, links, contexto..."></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button onclick="borrarTareaActual()" id="btn-borrar-tarea" class="btn-cancelar" style="margin-right:auto;display:none;color:#ef5350">Borrar</button>
-                        <button onclick="cerrarModalTarea()" class="btn-cancelar">Cancelar</button>
-                        <button onclick="guardarTarea()" class="btn-guardar">Guardar</button>
-                    </div>
-                </div>
-            </div>
+            <!-- modal de tarea migrado a section-tareas -->
         </div>
 
         <div class="section">
@@ -2646,41 +2751,122 @@
             <div class="planner-filtros">
                 <div class="filtro-grupo">
                     <label>Persona</label>
-                    <select id="t-filtro-persona" onchange="renderTablero()">
+                    <select id="kt-filtro-persona" onchange="ktRender()">
                         <option value="">Todas</option>
-                        <option value="micaela">Micaela</option>
-                        <option value="pilar">Pilar</option>
-                        <option value="pedro">Pedro</option>
-                        <option value="rocio">Rocío</option>
+                        <option value="Micaela">Micaela</option>
+                        <option value="Pilar">Pilar</option>
+                        <option value="Pedro">Pedro</option>
+                        <option value="Rocío">Rocío</option>
                     </select>
                 </div>
                 <div class="filtro-grupo">
                     <label>Cliente</label>
-                    <select id="t-filtro-cliente" onchange="renderTablero()">
+                    <select id="kt-filtro-cliente" onchange="ktRender()">
                         <option value="">Todos</option>
-                        <option>Aberturas Patti</option>
-                        <option>AO</option>
-                        <option>FB SEGUROS</option>
-                        <option>HAUSBROT</option>
-                        <option>KINEBS</option>
-                        <option>M&amp;T</option>
-                        <option>NIGRUM</option>
-                        <option>OSMEDICA</option>
+                        <option>Aberturas Patti</option><option>AO</option>
+                        <option>FB SEGUROS</option><option>HAUSBROT</option>
+                        <option>KINEBS</option><option>M&amp;T</option>
+                        <option>NIGRUM</option><option>OSMEDICA</option>
                     </select>
                 </div>
-                <div class="filtro-grupo">
-                    <label>Prioridad</label>
-                    <select id="t-filtro-prioridad" onchange="renderTablero()">
-                        <option value="">Todas</option>
-                        <option value="alta">Alta</option>
-                        <option value="media">Media</option>
-                        <option value="baja">Baja</option>
-                    </select>
-                </div>
-                <button class="btn-nueva-pieza" onclick="abrirModalTarea()">+ Nueva tarea</button>
+                <button class="btn-nueva-pieza" onclick="ktOpenModal(null,'no_empezado')">+ Nueva tarea</button>
             </div>
 
-            <div id="tablero-tareas-full" class="tablero-personas"></div>
+            <!-- Kanban Board -->
+            <div class="kanban-board" id="kt-board"></div>
+
+            <!-- Modal de tarea -->
+            <div class="kt-modal-overlay" id="kt-modal" style="display:none" onclick="ktCloseOnBg(event)">
+                <div class="kt-modal">
+                    <div class="kt-modal-head">
+                        <span class="kt-status-dot" id="kt-m-dot"></span>
+                        <input type="text" id="kt-m-title" placeholder="Título de la tarea…">
+                    </div>
+                    <div class="kt-modal-body">
+                        <div class="kt-row3">
+                            <div class="kt-field">
+                                <label>Asignado a</label>
+                                <select id="kt-m-assignee">
+                                    <option value="">— Nadie —</option>
+                                    <option>Micaela</option><option>Pilar</option>
+                                    <option>Pedro</option><option>Rocío</option>
+                                </select>
+                            </div>
+                            <div class="kt-field">
+                                <label>Cliente</label>
+                                <select id="kt-m-client">
+                                    <option value="">— Sin cliente —</option>
+                                    <option>Aberturas Patti</option><option>AO</option>
+                                    <option>FB SEGUROS</option><option>HAUSBROT</option>
+                                    <option>KINEBS</option><option>M&amp;T</option>
+                                    <option>NIGRUM</option><option>OSMEDICA</option>
+                                </select>
+                            </div>
+                            <div class="kt-field">
+                                <label>Vence</label>
+                                <input type="datetime-local" id="kt-m-due">
+                            </div>
+                        </div>
+                        <div class="kt-row">
+                            <div class="kt-field">
+                                <label>Estado</label>
+                                <select id="kt-m-status" onchange="ktUpdateDot()">
+                                    <option value="no_empezado">No empezado</option>
+                                    <option value="en_proceso">En proceso</option>
+                                    <option value="a_chequear">A chequear</option>
+                                    <option value="entregado">Entregado</option>
+                                </select>
+                            </div>
+                            <div class="kt-field">
+                                <label>Prioridad</label>
+                                <select id="kt-m-priority">
+                                    <option value="alta">Alta</option>
+                                    <option value="media" selected>Media</option>
+                                    <option value="baja">Baja</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="kt-field">
+                            <label>Descripción</label>
+                            <textarea id="kt-m-desc" rows="3" placeholder="Detalles, contexto…"></textarea>
+                        </div>
+                        <!-- Links inteligentes -->
+                        <div class="kt-field">
+                            <label>Links (pegar URL + Enter)</label>
+                            <input type="url" id="kt-m-link-input" placeholder="https://…" onkeydown="ktLinkKeydown(event)">
+                            <div class="kt-link-loading" id="kt-m-link-loading" style="display:none">Obteniendo título…</div>
+                            <div class="kt-links-list" id="kt-m-links-list"></div>
+                        </div>
+                        <!-- Archivos adjuntos -->
+                        <div class="kt-field">
+                            <label>Adjuntos</label>
+                            <input type="file" id="kt-m-file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="ktFileChange(event)" style="color:rgba(255,255,255,0.5)">
+                            <div class="kt-attach-list" id="kt-m-attach-list"></div>
+                        </div>
+                        <!-- Recurrencia -->
+                        <div class="kt-field">
+                            <label>Recurrencia</label>
+                            <div class="kt-recur-wrap">
+                                <select id="kt-m-recur" onchange="ktToggleRecur()">
+                                    <option value="">Sin recurrencia</option>
+                                    <option value="daily">Diaria</option>
+                                    <option value="weekly">Semanal</option>
+                                    <option value="monthly">Mensual</option>
+                                </select>
+                                <div class="kt-recur-extra" id="kt-m-recur-extra" style="display:none">
+                                    <select id="kt-m-recur-day" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:7px;padding:7px 10px;color:#fff;font-family:inherit;font-size:13px;outline:none;">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kt-modal-foot">
+                        <button class="kt-btn-del" id="kt-m-del" onclick="ktDeleteTask()" style="display:none">Borrar tarea</button>
+                        <button class="kt-btn-cancel" onclick="ktCloseModal()">Cancelar</button>
+                        <button class="kt-btn-save" onclick="ktSaveTask()">Guardar</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -4535,7 +4721,431 @@
         renderPlanners();
     }
 
-    // ===== TAREAS POR PERSONA =====
+    // ===== NUEVO KANBAN (reemplaza sistema por persona) =====
+    // ---- Configuración ----
+    var KT_COLS = [
+        { id: 'no_empezado', label: 'No empezado', color: '#ef5350' },
+        { id: 'en_proceso',  label: 'En proceso',  color: '#ff9800' },
+        { id: 'a_chequear',  label: 'A chequear',  color: '#ffc107' },
+        { id: 'entregado',   label: 'Entregado',   color: '#4caf50' },
+    ];
+
+    // ---- Persistencia (Supabase o localStorage fallback) ----
+    var ktSB = null;       // Supabase client (lazy init)
+    var ktUseDB = false;   // true cuando Supabase está configurado
+    var ktTasks = [];      // array en memoria
+    var ktEditId = null;   // id de la tarea que se edita
+    var ktDragging = null; // id arrastrado
+    var ktModalLinks = []; // links en el modal actual
+    var ktModalAttach = []; // adjuntos en el modal actual
+
+    // Migrar tareas antiguas (localStorage key viejo) al nuevo formato
+    (function migrateOldTasks() {
+        var raw = localStorage.getItem('ktTasks');
+        if (raw) { try { ktTasks = JSON.parse(raw); } catch(e) { ktTasks = []; } return; }
+        // Migrar desde sistema viejo si existe
+        var oldRaw = localStorage.getItem('mkt-tareas');
+        if (!oldRaw) {
+            // Seed con tareas del hardcode original
+            ktTasks = [
+                { id: 't5000', title: 'Descargar fotos y videos de AO',               assignee: 'Micaela', client: 'AO',              status: 'no_empezado', priority: 'media', due_date: null, description: '', links: [], attachments: [], is_recurring: false, recurrence_type: null, recurrence_day: null, whatsapp_notified: false },
+                { id: 't5001', title: 'ACCIÓN CLUBES KINEBS',                          assignee: 'Micaela', client: 'KINEBS',           status: 'no_empezado', priority: 'media', due_date: null, description: '', links: [], attachments: [], is_recurring: false, recurrence_type: null, recurrence_day: null, whatsapp_notified: false },
+                { id: 't5010', title: 'CARGAR PAUTA',                                  assignee: 'Pedro',   client: '',                 status: 'no_empezado', priority: 'media', due_date: '2026-06-30T15:00', description: '', links: [], attachments: [], is_recurring: true,  recurrence_type: 'weekly', recurrence_day: 1, whatsapp_notified: false },
+                { id: 't5011', title: 'CHEQUEAR LOS PAGOS DEL MES',                    assignee: 'Pedro',   client: '',                 status: 'no_empezado', priority: 'alta',  due_date: '2026-07-10T10:00', description: '', links: [], attachments: [], is_recurring: true,  recurrence_type: 'monthly', recurrence_day: 10, whatsapp_notified: false },
+                { id: 't5015', title: 'Publis para ARI',                               assignee: 'Pilar',   client: '',                 status: 'en_proceso',  priority: 'media', due_date: null, description: '', links: [], attachments: [], is_recurring: false, recurrence_type: null, recurrence_day: null, whatsapp_notified: false },
+                { id: 't5016', title: 'Folletos hausbrot 15off',                       assignee: 'Pilar',   client: 'HAUSBROT',         status: 'en_proceso',  priority: 'media', due_date: null, description: 'Folletos chicos con 15% en efectivo, no acumulables con otras promos', links: [], attachments: [], is_recurring: false, recurrence_type: null, recurrence_day: null, whatsapp_notified: false },
+                { id: 't5019', title: 'EDITAR VIDEOS HAUSBROT',                        assignee: 'Rocío',   client: 'HAUSBROT',         status: 'en_proceso',  priority: 'alta',  due_date: null, description: '', links: [], attachments: [], is_recurring: false, recurrence_type: null, recurrence_day: null, whatsapp_notified: false },
+                { id: 't5020', title: 'EDITAR VIDEOS KINEBS',                          assignee: 'Rocío',   client: 'KINEBS',           status: 'no_empezado', priority: 'media', due_date: null, description: '', links: [], attachments: [], is_recurring: false, recurrence_type: null, recurrence_day: null, whatsapp_notified: false },
+                { id: 't5023', title: 'IR A OSMEDICA SAN MIGUEL A GRABAR',             assignee: 'Rocío',   client: 'OSMEDICA',         status: 'a_chequear',  priority: 'media', due_date: null, description: '', links: [], attachments: [], is_recurring: false, recurrence_type: null, recurrence_day: null, whatsapp_notified: false },
+                { id: 't5004', title: 'estetica de kinebs',                            assignee: 'Micaela', client: 'KINEBS',           status: 'no_empezado', priority: 'alta',  due_date: null, description: '', links: [], attachments: [], is_recurring: false, recurrence_type: null, recurrence_day: null, whatsapp_notified: false },
+                { id: 't5026', title: 'EDITAR VIDEOS INSTITUCIONALES OSMEDICA',        assignee: 'Rocío',   client: 'OSMEDICA',         status: 'no_empezado', priority: 'media', due_date: null, description: '', links: [], attachments: [], is_recurring: false, recurrence_type: null, recurrence_day: null, whatsapp_notified: false },
+                { id: 't5014', title: 'Grabar videos de pauta Nigrum',                 assignee: 'Pedro',   client: 'NIGRUM',           status: 'no_empezado', priority: 'media', due_date: '2026-05-19T10:00', description: '', links: [], attachments: [], is_recurring: false, recurrence_type: null, recurrence_day: null, whatsapp_notified: false },
+            ];
+            ktSave();
+        }
+    })();
+
+    function ktSave() {
+        if (ktUseDB) return; // Supabase handles persistence
+        localStorage.setItem('ktTasks', JSON.stringify(ktTasks));
+    }
+
+    // ---- Supabase init (async, lazy) ----
+    async function ktInitDB() {
+        if (ktSB || ktUseDB) return;
+        try {
+            var cfgRes = await fetch('/api/config');
+            var cfg = await cfgRes.json();
+            if (cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase) {
+                ktSB = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+                ktUseDB = true;
+                var { data } = await ktSB.from('tasks').select('*').order('created_at', { ascending: true });
+                if (data && data.length > 0) {
+                    ktTasks = data;
+                } else {
+                    // First run: push local data to Supabase
+                    for (var t of ktTasks) {
+                        await ktSB.from('tasks').upsert(t);
+                    }
+                }
+            }
+        } catch(e) { /* Supabase not available, use localStorage */ }
+    }
+
+    // ---- CRUD ----
+    async function ktPersist(task) {
+        if (ktUseDB && ktSB) {
+            await ktSB.from('tasks').upsert(task);
+        } else {
+            ktSave();
+        }
+    }
+
+    async function ktRemove(id) {
+        ktTasks = ktTasks.filter(function(t){ return t.id !== id; });
+        if (ktUseDB && ktSB) {
+            await ktSB.from('tasks').delete().eq('id', id);
+        } else {
+            ktSave();
+        }
+    }
+
+    // ---- Render ----
+    function ktRender() {
+        var board = document.getElementById('kt-board');
+        if (!board) return;
+        var hoy = new Date(); hoy.setHours(0,0,0,0);
+
+        var fp = (document.getElementById('kt-filtro-persona') || {}).value || '';
+        var fc = (document.getElementById('kt-filtro-cliente') || {}).value || '';
+
+        var html = '';
+        KT_COLS.forEach(function(col) {
+            var tasks = ktTasks.filter(function(t) {
+                if (t.status !== col.id) return false;
+                if (fp && t.assignee !== fp) return false;
+                if (fc && t.client !== fc) return false;
+                return true;
+            });
+            tasks.sort(function(a,b){
+                var pa = {alta:0,media:1,baja:2}[a.priority]||1;
+                var pb = {alta:0,media:1,baja:2}[b.priority]||1;
+                if (pa !== pb) return pa - pb;
+                return (a.due_date||'9999').localeCompare(b.due_date||'9999');
+            });
+
+            html += '<div class="kanban-col" style="--kb-color:' + col.color + '">';
+            html += '<div class="kanban-col-header">';
+            html += '<span class="kanban-col-dot"></span>';
+            html += '<span class="kanban-col-name">' + col.label + '</span>';
+            html += '<span class="kanban-col-count">' + tasks.length + '</span>';
+            html += '</div>';
+            html += '<div class="kanban-cards" id="kc-' + col.id + '" ';
+            html += 'ondragover="ktDragOver(event)" ondrop="ktDrop(event,\'' + col.id + '\')" >';
+
+            tasks.forEach(function(t) {
+                var dueLabel = '', dueCls = '';
+                if (t.due_date) {
+                    var d = new Date(t.due_date); d.setHours(0,0,0,0);
+                    var diff = Math.round((d - hoy) / 86400000);
+                    if (diff < 0)       { dueCls = 'late';  dueLabel = 'Atras. ' + Math.abs(diff) + 'd'; }
+                    else if (diff === 0){ dueCls = 'today'; dueLabel = 'Hoy'; }
+                    else                { dueLabel = diff + 'd'; }
+                }
+                var haLinks   = (t.links        || []).length > 0;
+                var haAttach  = (t.attachments  || []).length > 0;
+                var haRecur   = t.is_recurring;
+                html += '<div class="kb-card" draggable="true" ';
+                html += 'ondragstart="ktDragStart(event,\'' + t.id + '\')" ';
+                html += 'onclick="ktOpenModal(\'' + t.id + '\')" ';
+                html += 'style="border-left-color:' + col.color + '">';
+                html += '<div class="kb-card-title">' + escapeHtml(t.title) + '</div>';
+                html += '<div class="kb-card-meta">';
+                if (t.client) html += '<span class="kb-tag kb-tag-client">' + escapeHtml(t.client) + '</span>';
+                html += '<span class="kb-tag kb-tag-' + t.priority + '">' + t.priority.toUpperCase() + '</span>';
+                if (t.assignee) html += '<span style="font-size:10px;color:rgba(255,255,255,0.4)">· ' + escapeHtml(t.assignee) + '</span>';
+                if (dueLabel) html += '<span class="kb-due ' + dueCls + '" style="margin-left:auto">' + dueLabel + '</span>';
+                html += '</div>';
+                if (haLinks || haAttach || haRecur) {
+                    html += '<div class="kb-icons" style="margin-top:5px">';
+                    if (haLinks)  html += '<span class="kb-icon">🔗 ' + (t.links||[]).length + '</span>';
+                    if (haAttach) html += '<span class="kb-icon">📎 ' + (t.attachments||[]).length + '</span>';
+                    if (haRecur)  html += '<span class="kb-recur">↻</span>';
+                    html += '</div>';
+                }
+                html += '</div>';
+            });
+
+            html += '</div>'; // kanban-cards
+            html += '<button class="kanban-add-btn" onclick="ktOpenModal(null,\'' + col.id + '\')">+ Agregar</button>';
+            html += '</div>'; // kanban-col
+        });
+
+        board.innerHTML = html;
+
+        // Actualizar stat en el dashboard
+        var hoyStr = new Date().toISOString().split('T')[0];
+        var urg = ktTasks.filter(function(t){
+            if (t.status === 'entregado') return false;
+            if (!t.due_date) return t.priority === 'alta';
+            return t.due_date.split('T')[0] <= hoyStr;
+        });
+        var statEl = document.getElementById('stat-tareas-urgentes');
+        if (statEl) statEl.textContent = urg.length;
+    }
+
+    // ---- Drag & Drop ----
+    function ktDragStart(ev, id) {
+        ktDragging = id;
+        ev.dataTransfer.effectAllowed = 'move';
+        setTimeout(function(){ var el = ev.target; if(el) el.classList.add('dragging'); }, 0);
+    }
+    function ktDragOver(ev) { ev.preventDefault(); ev.dataTransfer.dropEffect = 'move'; ev.currentTarget.classList.add('drag-over'); }
+    function ktDrop(ev, colId) {
+        ev.preventDefault(); ev.currentTarget.classList.remove('drag-over');
+        if (!ktDragging) return;
+        var task = ktTasks.find(function(t){ return t.id === ktDragging; });
+        if (!task || task.status === colId) { ktDragging = null; return; }
+        var oldStatus = task.status;
+        task.status = colId;
+        task.whatsapp_notified = false;
+        ktPersist(task).then(function(){
+            if (colId === 'entregado' && task.is_recurring) ktCreateNextRecurrence(task);
+        });
+        ktDragging = null;
+        ktRender();
+        renderUrgentes();
+    }
+
+    // ---- Recurrencia ----
+    function ktNextDueDate(task) {
+        if (!task.due_date) return null;
+        var d = new Date(task.due_date);
+        if (task.recurrence_type === 'daily') {
+            d.setDate(d.getDate() + 1);
+        } else if (task.recurrence_type === 'weekly') {
+            d.setDate(d.getDate() + 7);
+        } else if (task.recurrence_type === 'monthly') {
+            var day = task.recurrence_day || d.getDate();
+            d.setMonth(d.getMonth() + 1);
+            d.setDate(day);
+        }
+        return d.toISOString().slice(0,16);
+    }
+    function ktCreateNextRecurrence(task) {
+        var nextDue = ktNextDueDate(task);
+        var newTask = Object.assign({}, task, {
+            id: 'kt' + Date.now(),
+            status: 'no_empezado',
+            due_date: nextDue,
+            whatsapp_notified: false,
+        });
+        ktTasks.push(newTask);
+        ktPersist(newTask);
+        ktRender();
+    }
+
+    // ---- Modal ----
+    var KT_COL_COLORS = { no_empezado: '#ef5350', en_proceso: '#ff9800', a_chequear: '#ffc107', entregado: '#4caf50' };
+    function ktOpenModal(id, defaultStatus) {
+        ktEditId = id || null;
+        var t = id ? ktTasks.find(function(x){ return x.id === id; }) : null;
+
+        document.getElementById('kt-m-title').value    = t ? t.title       : '';
+        document.getElementById('kt-m-assignee').value = t ? (t.assignee||'') : '';
+        document.getElementById('kt-m-client').value   = t ? (t.client||'')   : '';
+        document.getElementById('kt-m-due').value      = t ? (t.due_date||'') : '';
+        document.getElementById('kt-m-status').value   = t ? t.status : (defaultStatus||'no_empezado');
+        document.getElementById('kt-m-priority').value = t ? (t.priority||'media') : 'media';
+        document.getElementById('kt-m-desc').value     = t ? (t.description||'') : '';
+        document.getElementById('kt-m-recur').value    = t ? (t.recurrence_type||'') : '';
+        document.getElementById('kt-m-del').style.display = t ? '' : 'none';
+        document.getElementById('kt-m-link-input').value = '';
+        document.getElementById('kt-m-link-loading').style.display = 'none';
+
+        ktModalLinks  = t ? JSON.parse(JSON.stringify(t.links||[]))       : [];
+        ktModalAttach = t ? JSON.parse(JSON.stringify(t.attachments||[])) : [];
+
+        ktRenderModalLinks();
+        ktRenderModalAttach();
+        ktUpdateDot();
+        ktToggleRecur();
+        if (t && t.recurrence_day != null) document.getElementById('kt-m-recur-day').value = t.recurrence_day;
+
+        document.getElementById('kt-modal').style.display = 'flex';
+        document.getElementById('kt-m-title').focus();
+    }
+    function ktCloseModal() { document.getElementById('kt-modal').style.display = 'none'; }
+    function ktCloseOnBg(ev) { if (ev.target === document.getElementById('kt-modal')) ktCloseModal(); }
+
+    function ktUpdateDot() {
+        var status = document.getElementById('kt-m-status').value;
+        document.getElementById('kt-m-dot').style.background = KT_COL_COLORS[status] || '#e63384';
+    }
+
+    function ktToggleRecur() {
+        var type = document.getElementById('kt-m-recur').value;
+        var extra = document.getElementById('kt-m-recur-extra');
+        var sel = document.getElementById('kt-m-recur-day');
+        extra.style.display = type ? '' : 'none';
+        sel.innerHTML = '';
+        if (type === 'weekly') {
+            ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'].forEach(function(d,i){
+                sel.innerHTML += '<option value="' + i + '">' + d + '</option>';
+            });
+        } else if (type === 'monthly') {
+            for (var i=1;i<=31;i++) sel.innerHTML += '<option value="'+i+'">Día '+i+'</option>';
+        }
+    }
+
+    async function ktSaveTask() {
+        var title = document.getElementById('kt-m-title').value.trim();
+        if (!title) { document.getElementById('kt-m-title').focus(); return; }
+        var recurType = document.getElementById('kt-m-recur').value;
+        var recurDay  = recurType ? parseInt(document.getElementById('kt-m-recur-day').value)||null : null;
+        var task = {
+            id:               ktEditId || ('kt' + Date.now()),
+            title:            title,
+            assignee:         document.getElementById('kt-m-assignee').value,
+            client:           document.getElementById('kt-m-client').value,
+            due_date:         document.getElementById('kt-m-due').value || null,
+            status:           document.getElementById('kt-m-status').value,
+            priority:         document.getElementById('kt-m-priority').value,
+            description:      document.getElementById('kt-m-desc').value,
+            links:            ktModalLinks,
+            attachments:      ktModalAttach,
+            is_recurring:     !!recurType,
+            recurrence_type:  recurType || null,
+            recurrence_day:   recurDay,
+            whatsapp_notified: false,
+        };
+        if (ktEditId) {
+            var idx = ktTasks.findIndex(function(t){ return t.id === ktEditId; });
+            if (idx >= 0) ktTasks[idx] = task;
+        } else {
+            ktTasks.push(task);
+        }
+        await ktPersist(task);
+        ktCloseModal();
+        ktRender();
+        renderUrgentes();
+    }
+
+    async function ktDeleteTask() {
+        if (!ktEditId) return;
+        if (!confirm('¿Borrar esta tarea?')) return;
+        await ktRemove(ktEditId);
+        ktCloseModal();
+        ktRender();
+        renderUrgentes();
+    }
+
+    // ---- Smart Links ----
+    async function ktLinkKeydown(ev) {
+        if (ev.key !== 'Enter') return;
+        ev.preventDefault();
+        var url = ev.target.value.trim();
+        if (!url) return;
+        if (!url.startsWith('http')) url = 'https://' + url;
+        ev.target.value = '';
+        var loading = document.getElementById('kt-m-link-loading');
+        loading.style.display = '';
+        try {
+            var r = await fetch('/api/links?url=' + encodeURIComponent(url));
+            var data = await r.json();
+            ktModalLinks.push({ title: data.title, url: data.url });
+        } catch {
+            ktModalLinks.push({ title: url, url: url });
+        }
+        loading.style.display = 'none';
+        ktRenderModalLinks();
+    }
+    function ktRenderModalLinks() {
+        var el = document.getElementById('kt-m-links-list');
+        if (!el) return;
+        el.innerHTML = ktModalLinks.map(function(l, i) {
+            return '<a class="kt-link-chip" href="' + escapeHtml(l.url) + '" target="_blank" onclick="event.stopPropagation()">' +
+                   '🔗 ' + escapeHtml(l.title) +
+                   '</a><button class="kt-link-chip-del" onclick="ktDelLink(' + i + ')">×</button>';
+        }).join('');
+    }
+    function ktDelLink(i) { ktModalLinks.splice(i, 1); ktRenderModalLinks(); }
+
+    // ---- File Attachments ----
+    async function ktFileChange(ev) {
+        var files = Array.from(ev.target.files);
+        for (var f of files) {
+            if (ktUseDB && ktSB) {
+                var path = 'tasks/' + Date.now() + '_' + f.name;
+                var { data } = await ktSB.storage.from('task-attachments').upload(path, f);
+                if (data) {
+                    var { data: pub } = ktSB.storage.from('task-attachments').getPublicUrl(path);
+                    ktModalAttach.push({ name: f.name, url: pub.publicUrl });
+                }
+            } else {
+                // Fallback: store as base64 (small files only)
+                if (f.size < 500000) {
+                    var b64 = await new Promise(function(res) {
+                        var r = new FileReader(); r.onload = function(e){ res(e.target.result); }; r.readAsDataURL(f);
+                    });
+                    ktModalAttach.push({ name: f.name, url: b64 });
+                }
+            }
+        }
+        ev.target.value = '';
+        ktRenderModalAttach();
+    }
+    function ktRenderModalAttach() {
+        var el = document.getElementById('kt-m-attach-list');
+        if (!el) return;
+        el.innerHTML = ktModalAttach.map(function(a, i) {
+            return '<a class="kt-attach-chip" href="' + escapeHtml(a.url) + '" target="_blank" onclick="event.stopPropagation()">📎 ' + escapeHtml(a.name) + '</a>';
+        }).join('');
+    }
+
+    // ---- Urgentes (dashboard panel) — usa ktTasks ----
+    function renderUrgentes() {
+        var hoyStr = new Date().toISOString().split('T')[0];
+        var el = document.getElementById('urgentes-resumen');
+        if (!el) return;
+        var urg = ktTasks.filter(function(t) {
+            if (t.status === 'entregado') return false;
+            if (!t.due_date) return t.priority === 'alta';
+            return t.due_date.split('T')[0] <= hoyStr;
+        });
+        urg.sort(function(a,b){ return (a.due_date||'9999').localeCompare(b.due_date||'9999'); });
+        var statEl = document.getElementById('stat-tareas-urgentes');
+        if (statEl) statEl.textContent = urg.length;
+        if (urg.length === 0) { el.innerHTML = '<div class="urgentes-vacio">Sin tareas urgentes.</div>'; return; }
+        el.innerHTML = urg.map(function(t) {
+            var atrasada = t.due_date && t.due_date.split('T')[0] < hoyStr;
+            var dias = atrasada ? Math.round((new Date(hoyStr)-new Date(t.due_date.split('T')[0]))/86400000) : 0;
+            var vLabel = !t.due_date ? 'Sin fecha' : atrasada ? 'Atrasada '+dias+'d' : 'Vence hoy';
+            return '<div class="urgente-card' + (atrasada?' atrasada':'') + '" onclick="showTab(4,document.querySelectorAll(\'.nav-btn\')[4])" style="cursor:pointer">' +
+                '<div class="urgente-titulo">' + escapeHtml(t.title) + '</div>' +
+                '<div class="urgente-meta">' +
+                '<span class="urgente-cliente">' + escapeHtml(t.client||t.assignee||'') + '</span>' +
+                '<span style="color:#b0b0b0;font-size:10px">' + escapeHtml(t.assignee||'') + '</span>' +
+                '<span class="urgente-vence' + (atrasada?' atrasada':'') + '">' + vLabel + '</span>' +
+                '</div></div>';
+        }).join('');
+    }
+
+    // ---- Stub para código viejo que llama renderTablero ----
+    function renderTablero() { ktRender(); }
+    function abrirModalTarea(id) { ktOpenModal(id||null); }
+    function cerrarModalTarea() { ktCloseModal(); }
+    function guardarTarea() { ktSaveTask(); }
+    function borrarTareaActual() { ktDeleteTask(); }
+    function cancelarInputRapido() {}
+    function manejarTeclaRapida() {}
+
+    // ---- init ----
+    (function ktInit() {
+        ktInitDB().then(function(){ ktRender(); });
+    })();
+
+    // ===== PERSONAS (legacy stub — no se usa en nuevo Kanban) =====
     var PERSONAS = [
         { id: 'micaela', nombre: 'Micaela', rol: 'Directora' },
         { id: 'pilar',   nombre: 'Pilar',   rol: 'Diseñadora gráfica' },
