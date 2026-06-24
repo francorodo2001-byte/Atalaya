@@ -188,6 +188,52 @@
         body.theme-light .dia-vacio { color: rgba(0,0,0,0.15) !important; }
         body.theme-light .pub-status.listo     { background: rgba(14,164,112,0.10) !important; color: #0ea470 !important; }
         body.theme-light .pub-status.pendiente { background: rgba(196,143,12,0.10) !important; color: #c48f0c !important; }
+
+        /* ── TAREAS URGENTES — light mode ────────────────────────── */
+        body.theme-light .urgentes-wrap {
+            background: #ffffff !important;
+            border: 1px solid rgba(230,51,132,0.15) !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+        }
+        body.theme-light .urgentes-sub { color: #9a97b8 !important; }
+        body.theme-light .urgente-card {
+            background: #f8f7fd !important;
+            border-color: rgba(0,0,0,0.08) !important;
+        }
+        body.theme-light .urgente-card.atrasada {
+            background: rgba(220,38,38,0.04) !important;
+            border-left-color: #ef5350 !important;
+        }
+        body.theme-light .urgente-titulo { color: #1a1828 !important; }
+        body.theme-light .urgente-meta   { color: #5a5778 !important; }
+
+        /* ── KANBAN TAREAS — light mode ──────────────────────────── */
+        body.theme-light .tarea-card {
+            background: #ffffff !important;
+            border-color: rgba(0,0,0,0.08) !important;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+        }
+        body.theme-light .tarea-card:hover {
+            background: #f8f7fd !important;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.10) !important;
+        }
+        body.theme-light .tarea-titulo        { color: #1a1828 !important; }
+        body.theme-light .tarea-cliente-tag   { color: #5a5778 !important; }
+        body.theme-light .tarea-vence {
+            background: #f0effa !important;
+            border-color: rgba(0,0,0,0.12) !important;
+            color: #5a5778 !important;
+        }
+        body.theme-light .prio-baja {
+            background: rgba(0,0,0,0.04) !important;
+            color: #7a77a0 !important;
+            border-color: rgba(0,0,0,0.10) !important;
+        }
+        body.theme-light .agregar-rapido {
+            background: #f0effa !important;
+            border-color: rgba(0,0,0,0.12) !important;
+            color: #9a97b8 !important;
+        }
     </style>
     <script>
         function applyThemeCRM(t) {
